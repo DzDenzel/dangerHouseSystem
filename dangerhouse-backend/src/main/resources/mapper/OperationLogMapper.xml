@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dz.dangerhouse.mapper.OperationLogMapper">
+
+    <!-- 根据用户ID分页查询操作日志 -->
+    <select id="findByUserId" resultType="com.dz.dangerhouse.entity.OperationLog">
+        SELECT * FROM operation_log
+        WHERE user_id = #{userId}
+        ORDER BY create_time DESC
+        LIMIT #{pageNum}, #{pageSize}
+    </select>
+
+</mapper>

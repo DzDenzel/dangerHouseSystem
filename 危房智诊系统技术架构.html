@@ -1,0 +1,1734 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>危房智诊系统技术架构 PPT</title>
+  <style>
+    :root {
+      --bg: #f5efe4;
+      --ink: #17211c;
+      --muted: #637069;
+      --paper: #fffaf0;
+      --card: rgba(255, 250, 240, 0.88);
+      --line: rgba(23, 33, 28, 0.16);
+      --green: #1d6b54;
+      --green-2: #2a8a67;
+      --gold: #c4872b;
+      --red: #b74e3c;
+      --blue: #315d83;
+      --shadow: 0 22px 70px rgba(39, 32, 21, 0.16);
+      --radius: 26px;
+      --mono: "Cascadia Mono", "JetBrains Mono", Consolas, monospace;
+      --sans: "Microsoft YaHei", "PingFang SC", "HarmonyOS Sans SC", "Noto Sans CJK SC", sans-serif;
+      --serif: "LXGW WenKai", "Songti SC", "SimSun", serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: var(--sans);
+      background:
+        radial-gradient(circle at 12% 18%, rgba(196, 135, 43, 0.22), transparent 30%),
+        radial-gradient(circle at 78% 10%, rgba(29, 107, 84, 0.18), transparent 28%),
+        linear-gradient(135deg, #f7efdf 0%, #ece1cc 52%, #d9e1d4 100%);
+      overflow: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.32;
+      background-image:
+        linear-gradient(rgba(23, 33, 28, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(23, 33, 28, 0.06) 1px, transparent 1px);
+      background-size: 34px 34px;
+      mask-image: linear-gradient(to bottom, transparent, black 10%, black 86%, transparent);
+    }
+
+    .deck {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      padding: 5.5vh 6.2vw;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateX(22px) scale(0.985);
+      transition: opacity 260ms ease, transform 260ms ease, visibility 260ms ease;
+    }
+
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(0) scale(1);
+      z-index: 3;
+    }
+
+    .slide-inner {
+      align-self: center;
+      width: min(1440px, 100%);
+      margin: 0 auto;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+      padding: 8px 14px;
+      border: 1px solid rgba(29, 107, 84, 0.22);
+      border-radius: 999px;
+      color: var(--green);
+      background: rgba(255, 250, 240, 0.54);
+      font-size: clamp(13px, 1vw, 16px);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 0 5px rgba(29, 107, 84, 0.12);
+    }
+
+    h1, h2, h3 {
+      margin: 0;
+      line-height: 1.05;
+      letter-spacing: -0.035em;
+    }
+
+    h1 {
+      font-family: var(--serif);
+      font-size: clamp(58px, 8vw, 118px);
+      font-weight: 800;
+      max-width: 1100px;
+    }
+
+    h2 {
+      font-size: clamp(38px, 4.2vw, 68px);
+      font-weight: 850;
+      max-width: 1120px;
+    }
+
+    h3 {
+      font-size: clamp(22px, 1.8vw, 32px);
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    p {
+      margin: 0;
+      color: var(--muted);
+      font-size: clamp(17px, 1.32vw, 23px);
+      line-height: 1.68;
+    }
+
+    .subtitle {
+      max-width: 1050px;
+      margin-top: 24px;
+      font-size: clamp(20px, 1.55vw, 28px);
+      color: #39463f;
+    }
+
+    .hero-line {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-top: 42px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 15px;
+      border-radius: 999px;
+      background: rgba(23, 33, 28, 0.08);
+      border: 1px solid rgba(23, 33, 28, 0.1);
+      font-size: 15px;
+      color: #29372f;
+      white-space: nowrap;
+    }
+
+    .pill strong {
+      color: var(--green);
+    }
+
+    .grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .grid.cols-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .grid.cols-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .grid.cols-4 {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 22px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+    }
+
+    .card.tight {
+      padding: 18px;
+    }
+
+    .card.accent {
+      background:
+        linear-gradient(135deg, rgba(29, 107, 84, 0.12), transparent 58%),
+        rgba(255, 250, 240, 0.9);
+    }
+
+    .metric {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-height: 130px;
+      justify-content: space-between;
+    }
+
+    .metric .num {
+      font-family: var(--serif);
+      font-size: clamp(40px, 4.4vw, 72px);
+      line-height: 0.95;
+      color: var(--green);
+      font-weight: 900;
+    }
+
+    .metric .label {
+      color: #33443a;
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .metric .desc {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .stack-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .stack-list span,
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 10px;
+      border-radius: 12px;
+      color: #24362d;
+      background: rgba(29, 107, 84, 0.08);
+      border: 1px solid rgba(29, 107, 84, 0.12);
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
+    .tag.gold {
+      background: rgba(196, 135, 43, 0.11);
+      border-color: rgba(196, 135, 43, 0.22);
+    }
+
+    .tag.red {
+      background: rgba(183, 78, 60, 0.11);
+      border-color: rgba(183, 78, 60, 0.2);
+    }
+
+    .tag.blue {
+      background: rgba(49, 93, 131, 0.1);
+      border-color: rgba(49, 93, 131, 0.2);
+    }
+
+    .list {
+      margin: 14px 0 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 10px;
+    }
+
+    .list li {
+      position: relative;
+      padding-left: 20px;
+      color: #36443d;
+      font-size: clamp(15px, 1.08vw, 18px);
+      line-height: 1.52;
+    }
+
+    .list li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.62em;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--gold);
+    }
+
+    code {
+      padding: 2px 6px;
+      border-radius: 7px;
+      background: rgba(23, 33, 28, 0.08);
+      font-family: var(--mono);
+      font-size: 0.88em;
+      color: #20342a;
+    }
+
+    .codebox {
+      padding: 18px;
+      border-radius: 18px;
+      background: #13231c;
+      color: #e9f2e8;
+      font-family: var(--mono);
+      font-size: clamp(13px, 0.96vw, 16px);
+      line-height: 1.65;
+      white-space: pre-wrap;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: 18px;
+      font-size: clamp(13px, 0.95vw, 16px);
+      background: rgba(255, 250, 240, 0.72);
+    }
+
+    th, td {
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(23, 33, 28, 0.11);
+      vertical-align: top;
+      text-align: left;
+      line-height: 1.48;
+    }
+
+    th {
+      color: #173528;
+      background: rgba(29, 107, 84, 0.1);
+      font-weight: 850;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .table-scroll {
+      max-height: 56vh;
+      overflow: auto;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+    }
+
+    .architecture {
+      display: grid;
+      grid-template-columns: 1fr 1.25fr 1fr;
+      gap: 16px;
+      align-items: stretch;
+      margin-top: 28px;
+    }
+
+    .arch-col {
+      display: grid;
+      gap: 14px;
+    }
+
+    .arch-node {
+      position: relative;
+      padding: 20px;
+      border-radius: 22px;
+      min-height: 118px;
+      background: rgba(255, 250, 240, 0.88);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    .arch-node h3 {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+
+    .arch-node p {
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    .arch-node.core {
+      background:
+        linear-gradient(135deg, rgba(29, 107, 84, 0.22), rgba(255, 250, 240, 0.86) 48%),
+        rgba(255, 250, 240, 0.95);
+      border-color: rgba(29, 107, 84, 0.22);
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 26px;
+    }
+
+    .flow-step {
+      position: relative;
+      padding: 18px 14px;
+      min-height: 132px;
+      border-radius: 20px;
+      background: rgba(255, 250, 240, 0.88);
+      border: 1px solid var(--line);
+    }
+
+    .flow-step:not(:last-child)::after {
+      content: "→";
+      position: absolute;
+      right: -13px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--green);
+      font-weight: 900;
+      z-index: 2;
+    }
+
+    .flow-step .idx {
+      display: inline-flex;
+      width: 28px;
+      height: 28px;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      color: white;
+      background: var(--green);
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .flow-step strong {
+      display: block;
+      margin-bottom: 8px;
+      color: #21342b;
+      font-size: 17px;
+    }
+
+    .flow-step span {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .timeline {
+      display: grid;
+      grid-template-columns: 0.4fr repeat(6, 1fr);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      overflow: hidden;
+      background: rgba(255, 250, 240, 0.78);
+      margin-top: 22px;
+    }
+
+    .timeline div {
+      padding: 13px 12px;
+      border-right: 1px solid rgba(23, 33, 28, 0.1);
+      border-bottom: 1px solid rgba(23, 33, 28, 0.1);
+      font-size: 14px;
+      line-height: 1.42;
+    }
+
+    .timeline div:nth-child(7n) {
+      border-right: 0;
+    }
+
+    .timeline .head {
+      background: rgba(29, 107, 84, 0.1);
+      font-weight: 900;
+      color: #173528;
+    }
+
+    .timeline .role {
+      font-weight: 900;
+      color: var(--green);
+    }
+
+    .footer {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 20;
+      height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      background: rgba(245, 239, 228, 0.78);
+      backdrop-filter: blur(16px);
+      border-top: 1px solid rgba(23, 33, 28, 0.1);
+      color: #5b685f;
+      font-size: 13px;
+    }
+
+    .progress {
+      position: fixed;
+      left: 0;
+      top: 0;
+      height: 4px;
+      width: 100%;
+      z-index: 30;
+      background: rgba(23, 33, 28, 0.09);
+    }
+
+    .progress span {
+      display: block;
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, var(--green), var(--gold));
+      transition: width 240ms ease;
+    }
+
+    .nav {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    button {
+      border: 1px solid rgba(23, 33, 28, 0.16);
+      background: rgba(255, 250, 240, 0.8);
+      color: #26362e;
+      border-radius: 999px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 800;
+    }
+
+    button:hover {
+      border-color: rgba(29, 107, 84, 0.4);
+      color: var(--green);
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: 0.9fr 1.1fr;
+      gap: 24px;
+      align-items: center;
+      margin-top: 24px;
+    }
+
+    .large-note {
+      font-family: var(--serif);
+      font-size: clamp(26px, 2.5vw, 42px);
+      line-height: 1.35;
+      color: #21342b;
+    }
+
+    .callout {
+      padding: 20px 22px;
+      border-left: 6px solid var(--green);
+      border-radius: 18px;
+      background: rgba(29, 107, 84, 0.1);
+      color: #2b4337;
+      font-size: clamp(16px, 1.15vw, 20px);
+      line-height: 1.6;
+    }
+
+    .small {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .toc {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 28px;
+    }
+
+    .toc a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .toc-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(255, 250, 240, 0.82);
+      border: 1px solid var(--line);
+      transition: transform 180ms ease, border-color 180ms ease;
+    }
+
+    .toc-item:hover {
+      transform: translateY(-2px);
+      border-color: rgba(29, 107, 84, 0.38);
+    }
+
+    .toc-item b {
+      display: inline-flex;
+      width: 34px;
+      height: 34px;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      background: rgba(29, 107, 84, 0.12);
+      color: var(--green);
+      font-family: var(--mono);
+    }
+
+    .toc-item span {
+      font-weight: 850;
+    }
+
+    .two-table {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-top: 22px;
+      align-items: start;
+    }
+
+    .compact-table th,
+    .compact-table td {
+      padding: 9px 10px;
+      font-size: 13px;
+    }
+
+    .slide-number {
+      font-family: var(--mono);
+      color: var(--green);
+      font-weight: 900;
+    }
+
+    @media (max-width: 1100px) {
+      body {
+        overflow: auto;
+      }
+
+      .deck {
+        height: auto;
+      }
+
+      .slide {
+        position: relative;
+        min-height: 100vh;
+        opacity: 1;
+        visibility: visible;
+        transform: none;
+        display: block;
+      }
+
+      .slide:not(.active) {
+        display: none;
+      }
+
+      .grid.cols-4,
+      .grid.cols-3,
+      .grid.cols-2,
+      .architecture,
+      .split,
+      .flow,
+      .toc,
+      .two-table {
+        grid-template-columns: 1fr;
+      }
+
+      .flow-step:not(:last-child)::after {
+        display: none;
+      }
+
+      .timeline {
+        grid-template-columns: 1fr;
+      }
+
+      .timeline div {
+        border-right: 0;
+      }
+    }
+
+    @media print {
+      body {
+        overflow: visible;
+        background: #f7efdf;
+      }
+
+      body::before,
+      .footer,
+      .progress {
+        display: none;
+      }
+
+      .deck {
+        height: auto;
+      }
+
+      .slide,
+      .slide.active {
+        position: relative;
+        opacity: 1;
+        visibility: visible;
+        transform: none;
+        min-height: 100vh;
+        page-break-after: always;
+        break-after: page;
+      }
+
+      .card,
+      .arch-node {
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="progress"><span id="progressBar"></span></div>
+  <main class="deck" id="deck">
+    <section class="slide active" data-title="封面">
+      <div></div>
+      <div class="slide-inner">
+        <div class="eyebrow">System Architecture Deck</div>
+        <h1>危房智诊系统<br />技术架构全景拆解</h1>
+        <p class="subtitle">基于当前代码仓库真实工程结构整理：管理后台、移动端 App、Spring Boot 后端、Python AI 检测服务、数据库与文件存储协作链路。</p>
+        <div class="hero-line">
+          <span class="pill"><strong>4</strong> 个工程模块</span>
+          <span class="pill"><strong>38</strong> 个后端映射接口</span>
+          <span class="pill"><strong>8</strong> 张核心业务表</span>
+          <span class="pill"><strong>Vue 3 / Flutter / Spring Boot / FastAPI</strong></span>
+        </div>
+      </div>
+      <div></div>
+    </section>
+
+    <section class="slide" data-title="目录">
+      <div></div>
+      <div class="slide-inner">
+        <div class="eyebrow">Agenda</div>
+        <h2>先看全局，再拆到每一层技术栈</h2>
+        <p class="subtitle">这份 HTML PPT 的阅读顺序按“架构一览 → 分端框架 → 接口与数据 → 运行部署 → 专业结论”展开。</p>
+        <div class="toc">
+          <a href="#slide-3"><div class="toc-item"><b>01</b><span>技术架构一览</span></div></a>
+          <a href="#slide-6"><div class="toc-item"><b>02</b><span>技术栈矩阵</span></div></a>
+          <a href="#slide-8"><div class="toc-item"><b>03</b><span>Web 管理端</span></div></a>
+          <a href="#slide-11"><div class="toc-item"><b>04</b><span>Flutter App 端</span></div></a>
+          <a href="#slide-13"><div class="toc-item"><b>05</b><span>Spring Boot 后端</span></div></a>
+          <a href="#slide-16"><div class="toc-item"><b>06</b><span>接口矩阵</span></div></a>
+          <a href="#slide-19"><div class="toc-item"><b>07</b><span>AI 检测服务</span></div></a>
+          <a href="#slide-21"><div class="toc-item"><b>08</b><span>数据与存储</span></div></a>
+          <a href="#slide-24"><div class="toc-item"><b>09</b><span>部署与结论</span></div></a>
+        </div>
+      </div>
+      <div></div>
+    </section>
+
+    <section class="slide" data-title="系统边界">
+      <div></div>
+      <div class="slide-inner">
+        <div class="eyebrow">Scope</div>
+        <h2>系统边界与工程模块</h2>
+        <div class="grid cols-4" style="margin-top: 30px;">
+          <div class="card metric">
+            <div class="num">App</div>
+            <div class="label"><code>dangerhouse-mobile-app</code></div>
+            <div class="desc">Flutter 跨端应用，面向普通用户与检测员，负责登录、建筑建档、现场拍摄、AI 检测、结果和报告查看。</div>
+          </div>
+          <div class="card metric">
+            <div class="num">Web</div>
+            <div class="label"><code>dangerhouse-admin-web</code></div>
+            <div class="desc">Vue 3 管理后台，面向管理员，负责仪表盘、建筑管理、检测记录、用户/日志等后台管理能力。</div>
+          </div>
+          <div class="card metric">
+            <div class="num">API</div>
+            <div class="label"><code>dangerhouse</code></div>
+            <div class="desc">Spring Boot 后端服务，统一承接鉴权、权限、业务编排、数据访问、缓存、文件、报告和 AI 服务调用。</div>
+          </div>
+          <div class="card metric">
+            <div class="num">AI</div>
+            <div class="label"><code>dangerhouse-ai-service</code></div>
+            <div class="desc">FastAPI + PyTorch 推理服务，负责裂缝检测、风险评级、标注图输出与多图聚合分析。</div>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 24px;">一句话：这是一个“移动端现场采集 + Web 后台管理 + 后端业务中台 + AI 推理微服务”的前后端分离系统。</div>
+      </div>
+      <div></div>
+    </section>
+
+    <section class="slide" data-title="总体架构">
+      <div></div>
+      <div class="slide-inner">
+        <div class="eyebrow">Architecture Overview</div>
+        <h2>总体技术架构一览</h2>
+        <div class="architecture">
+          <div class="arch-col">
+            <div class="arch-node">
+              <h3>Flutter App</h3>
+              <p>普通用户 / 检测员入口，Dio 调用后端 API，Riverpod 管理认证、检测、建筑等状态。</p>
+              <div class="badge-row"><span class="tag">Dart</span><span class="tag">go_router</span><span class="tag">Camera</span></div>
+            </div>
+            <div class="arch-node">
+              <h3>Vue Admin</h3>
+              <p>管理员入口，Axios + Pinia + Vue Router 构建后台工作台，统一使用 JWT 访问 API。</p>
+              <div class="badge-row"><span class="tag">Vue 3</span><span class="tag">Vite</span><span class="tag">Element Plus</span></div>
+            </div>
+          </div>
+          <div class="arch-col">
+            <div class="arch-node core">
+              <h3>Spring Boot Backend</h3>
+              <p>统一 API 网关式业务服务：鉴权、角色权限、建筑档案、检测任务、报告生成、文件代理、日志与缓存。</p>
+              <div class="badge-row"><span class="tag">Java 17</span><span class="tag">Spring Security</span><span class="tag">MyBatis-Plus</span><span class="tag">Redis</span></div>
+            </div>
+            <div class="arch-node core">
+              <h3>Business Orchestration</h3>
+              <p>后端创建检测任务，保存原图，调用 AI 服务，回写检测结果与结果图，生成 PDF 报告。</p>
+              <div class="badge-row"><span class="tag gold">JWT</span><span class="tag gold">OpenPDF</span><span class="tag gold">OSS / Local</span></div>
+            </div>
+          </div>
+          <div class="arch-col">
+            <div class="arch-node">
+              <h3>MySQL + Redis</h3>
+              <p>MySQL 存储用户、建筑、检测、图片、报告、日志；Redis 提供缓存、Token 黑名单与分布式锁能力。</p>
+              <div class="badge-row"><span class="tag blue">MySQL 8</span><span class="tag blue">Redis DB 5</span></div>
+            </div>
+            <div class="arch-node">
+              <h3>FastAPI AI</h3>
+              <p>接收图片批量检测，输出裂缝框、置信度、损伤比例、A/B/C/D 风险等级和 Base64 标注图。</p>
+              <div class="badge-row"><span class="tag red">PyTorch</span><span class="tag red">OpenCV</span><span class="tag red">DBSCAN</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div></div>
+    </section>
+
+    <section class="slide" data-title="业务闭环">
+      <div></div>
+      <div class="slide-inner">
+        <div class="eyebrow">Business Loop</div>
+        <h2>核心业务闭环：从建档到报告</h2>
+        <div class="flow">
+          <div class="flow-step"><div class="idx">1</div><strong>登录与角色识别</strong><span>APP 允许 USER / INSPECTOR；Web 仅允许 ADMIN；JWT 作为统一身份载体。</span></div>
+          <div class="flow-step"><div class="idx">2</div><strong>建筑建档</strong><span>录入名称、地址、结构、业主、坐标、图片；普通用户自动绑定 ownerUserId。</span></div>
+          <div class="flow-step"><div class="idx">3</div><strong>创建检测任务</strong><span>Detection 初始状态 CREATED，绑定 buildingId、userId 与检测备注。</span></div>
+          <div class="flow-step"><div class="idx">4</div><strong>上传检测图片</strong><span>多图表单上传，写入 image 表；任务进入 READY。</span></div>
+          <div class="flow-step"><div class="idx">5</div><strong>AI 检测与回写</strong><span>后端调用 FastAPI，保存结果图、裂缝数量、损伤比例、风险等级。</span></div>
+          <div class="flow-step"><div class="idx">6</div><strong>生成报告</strong><span>OpenPDF 生成正式 PDF，写入 report 表，App / Web 下载或查看。</span></div>
+        </div>
+        <div class="timeline">
+          <div class="head">状态</div><div class="head">CREATED</div><div class="head">READY</div><div class="head">PROCESSING</div><div class="head">COMPLETED</div><div class="head">FAILED</div><div class="head">CANCELLED</div>
+          <div class="role">含义</div><div>任务已创建</div><div>图片已上传</div><div>AI 检测中</div><div>检测完成</div><div>检测失败并记录 errorMessage</div><div>任务取消</div>
+        </div>
+      </div>
+      <div></div>
+    </section>
+
+    <section class="slide" data-title="技术栈矩阵">
+      <div></div>
+      <div class="slide-inner">
+        <div class="eyebrow">Technology Matrix</div>
+        <h2>技术栈总览矩阵</h2>
+        <div class="table-scroll" style="margin-top: 28px; max-height: 64vh;">
+          <table>
+            <thead>
+              <tr><th>层级</th><th>语言 / 运行时</th><th>核心框架</th><th>关键库与能力</th><th>工程特征</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Web 管理端</td><td>TypeScript 5.4、Node &gt;= 18</td><td>Vue 3.4、Vite 5、Vue Router 4、Pinia 2</td><td>Element Plus、Axios、ECharts、UnoCSS、Sass、vue-i18n、wangEditor、xlsx、NProgress</td><td>Hash 路由、动态权限路由、请求响应拦截、管理员端限制、构建拆包与 Terser 压缩。</td></tr>
+              <tr><td>移动 / 跨端 App</td><td>Dart SDK &gt;= 3.2 &lt; 4.0</td><td>Flutter、Riverpod、go_router</td><td>Dio、SharedPreferences、Camera、Image Picker、Permission Handler、json_serializable、build_runner</td><td>Clean-ish 分层：core / data / domain / presentation / providers，支持 Android、iOS、Web、Windows。</td></tr>
+              <tr><td>后端业务服务</td><td>Java 17</td><td>Spring Boot 3.2、Spring MVC、Spring Security、Spring AOP</td><td>JWT jjwt 0.11.5、MyBatis-Plus 3.5.3.1、SpringDoc 2.2、OpenPDF、Hutool、Aliyun OSS SDK、Redis Lettuce</td><td>Controller-Service-Mapper 分层、统一 Result、Swagger 文档、JWT 无状态认证、AOP 操作日志、定时清理。</td></tr>
+              <tr><td>AI 推理服务</td><td>Python</td><td>FastAPI、Uvicorn、Pydantic</td><td>PyTorch、TorchVision Faster R-CNN ResNet50 FPN v2、OpenCV、NumPy、scikit-learn DBSCAN、PyQt6</td><td>模型启动加载、批量图片推理、标注图 Base64 输出、A/B/C/D 风险评级。</td></tr>
+              <tr><td>数据与基础设施</td><td>SQL / Redis Protocol</td><td>MySQL 8、Redis、OSS / 本地文件系统</td><td>InnoDB、utf8mb4、逻辑删除、索引、外键、Redis 缓存穿透/击穿/雪崩防护</td><td>8 张核心表；文件存储抽象支持本地与阿里云 OSS 条件切换。</td></tr>
+              <tr><td>质量与工程化</td><td>多语言</td><td>Maven、pnpm、Flutter Test</td><td>ESLint、Prettier、Stylelint、Husky、lint-staged、Commitlint、mocktail、integration_test</td><td>前端/移动端已有工程化约束；后端具备测试依赖与 Maven Wrapper。</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div></div>
+    </section>
+
+    <section class="slide" data-title="仓库结构">
+      <div></div>
+      <div class="slide-inner">
+        <div class="eyebrow">Repository Structure</div>
+        <h2>仓库结构与代码职责</h2>
+        <div class="split">
+          <div class="codebox">dangerHouseSystem/
+├── dangerhouse-mobile-app/   Flutter App
+│   ├── lib/core/             路由、网络、异常、常量、主题
+│   ├── lib/data/             数据源、模型、Repository
+│   ├── lib/domain/           领域实体
+│   ├── lib/presentation/     页面与交互
+│   └── lib/providers/        Riverpod 状态
+├── dangerhouse-admin-web/    Vue 3 管理后台
+│   └── src/
+│       ├── api/              Axios 接口封装
+│       ├── layout/           后台布局
+│       ├── router/           静态路由
+│       ├── store/            Pinia Store
+│       └── views/            页面模块
+├── dangerhouse-backend/      Spring Boot 后端
+│   ├── controller/           REST API
+│   ├── service/              业务服务
+│   ├── mapper/               MyBatis 数据访问
+│   ├── entity/ dto/          数据实体与传输对象
+│   ├── cache/ config/        缓存、安全、异步、OSS
+│   └── sql/                  数据库脚本与说明
+└── dangerhouse-ai-service/   FastAPI AI 服务</div>
+          <div class="grid">
+            <div class="card accent"><h3>代码规模观察</h3><ul class="list"><li>仓库扫描到约 449 个工程文件，当前是多端组合项目。</li><li>后端 Controller 共 9 个，映射接口 38 个。</li><li>Web 管理端 views 共 17 个页面文件，主要围绕仪表盘、建筑、检测、系统管理。</li><li>App 端 lib 约 96 个 Dart 文件，分层相对完整。</li></ul></div>
+            <div class="card"><h3>专业拆分方式</h3><ul class="list"><li>按用户入口拆：App 现场业务、Web 后台管理。</li><li>按后端职责拆：鉴权、建筑、检测、报告、文件、后台、日志。</li><li>按数据链路拆：MySQL 业务事实、Redis 加速与会话控制、文件存储承载图片/PDF。</li></ul></div>
+          </div>
+        </div>
+      </div>
+      <div></div>
+    </section>
+
+    <section class="slide" data-title="Web 技术栈">
+      <div></div>
+      <div class="slide-inner">
+        <div class="eyebrow">Web Admin</div>
+        <h2>Web 管理端框架拆解</h2>
+        <div class="grid cols-3" style="margin-top: 28px;">
+          <div class="card">
+            <h3>基础框架</h3>
+            <div class="stack-list">
+              <span>Vue 3.4 + Composition API</span>
+              <span>TypeScript strict 模式</span>
+              <span>Vite 5 构建与开发服务</span>
+              <span>Vue Router Hash History</span>
+              <span>Pinia 状态管理</span>
+            </div>
+          </div>
+          <div class="card">
+            <h3>UI 与交互</h3>
+            <div class="stack-list">
+              <span>Element Plus 2.7</span>
+              <span>@element-plus/icons-vue</span>
+              <span>Iconify / SVG Icons</span>
+              <span>ECharts 5.5 仪表盘图表</span>
+              <span>animate.css + NProgress</span>
+            </div>
+          </div>
+          <div class="card">
+            <h3>工程化</h3>
+            <div class="stack-list">
+              <span>pnpm-only 预安装约束</span>
+              <span>ESLint + Prettier + Stylelint</span>
+              <span>Husky + lint-staged + Commitlint</span>
+              <span>unplugin-auto-import / components</span>
+              <span>Terser 生产压缩与 Rollup 输出分组</span>
+            </div>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 24px;">开发期配置：Vite server 当前在配置中固定为 <code>9090</code>，API 指向 <code>http://localhost:8080/api</code>；生产环境 <code>VITE_APP_BASE_API=/api</code>。</div>
+      </div>
+      <div></div>
+    </section>
+
+    <section class="slide" data-title="Web 架构">
+      <div></div>
+      <div class="slide-inner">
+        <div class="eyebrow">Web Runtime Architecture</div>
+        <h2>Web 端运行架构：路由、权限、请求</h2>
+        <div class="grid cols-3" style="margin-top: 28px;">
+          <div class="card">
+            <h3>路由层</h3>
+            <ul class="list">
+              <li><code>createWebHashHistory()</code>，适合静态部署与反向代理场景。</li>
+              <li>基础路由包含登录、首页、401/404、报告隐藏页。</li>
+              <li>业务路由由 <code>permission</code> Store 根据角色过滤后动态添加。</li>
+              <li>本地 fallback 菜单包含建筑管理、检测管理、系统管理。</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>权限层</h3>
+            <ul class="list">
+              <li>登录 Token 存储在 <code>localStorage</code>。</li>
+              <li>路由守卫检查 Token 与角色，未登录跳转 <code>/login</code>。</li>
+              <li>后台强约束 ADMIN：非管理员获取用户信息后会被清 Token 并拒绝进入。</li>
+              <li><code>VITE_USE_BACKEND_MENUS</code> 控制是否从后端菜单加载。</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>请求层</h3>
+            <ul class="list">
+              <li>Axios 实例统一 <code>baseURL</code>、超时 50 秒、JSON 请求头。</li>
+              <li>非认证接口自动注入 <code>Authorization: Bearer token</code>。</li>
+              <li>统一识别业务成功码 <code>200 / 0 / 00000</code>。</li>
+              <li>401 弹窗提示重新登录，普通错误用 Element Plus message 展示。</li>
+            </ul>
+          </div>
+        </div>
+        <div class="flow" style="grid-template-columns: repeat(5, minmax(0, 1fr));">
+          <div class="flow-step"><div class="idx">1</div><strong>登录</strong><span><code>/auth/login</code> 返回 JWT</span></div>
+          <div class="flow-step"><div class="idx">2</div><strong>保存 Token</strong><span>localStorage 持久化</span></div>
+          <div class="flow-step"><div class="idx">3</div><strong>拉取用户</strong><span><code>/user/profile</code> 校验 ADMIN</span></div>
+          <div class="flow-step"><div class="idx">4</div><strong>生成路由</strong><span>按角色过滤菜单</span></div>
+          <div class="flow-step"><div class="idx">5</div><strong>访问业务</strong><span>Axios 注入 Bearer Token</span></div>
+        </div>
+      </div>
+      <div></div>
+    </section>
+
+    <section class="slide" data-title="Web 模块">
+      <div></div>
+      <div class="slide-inner">
+        <div class="eyebrow">Web Modules</div>
+        <h2>Web 管理端业务模块与页面</h2>
+        <div class="two-table">
+          <div class="card tight">
+            <h3>页面模块</h3>
+            <table class="compact-table">
+              <thead><tr><th>模块</th><th>页面</th><th>职责</th></tr></thead>
+              <tbody>
+                <tr><td>首页</td><td><code>dashboard</code></td><td>统计卡片、风险分布、图表展示。</td></tr>
+                <tr><td>建筑管理</td><td><code>building/list</code>、<code>building/risk</code>、<code>building/detail</code></td><td>建筑档案列表、高危建筑、建筑详情。</td></tr>
+                <tr><td>检测管理</td><td><code>detection/records</code>、<code>detection/detail</code>、<code>detection/report</code></td><td>检测记录、检测详情、报告查看。</td></tr>
+                <tr><td>系统管理</td><td><code>system/user</code>、<code>system/log</code></td><td>用户管理、检测员设置、状态控制、操作日志。</td></tr>
+                <tr><td>认证与异常</td><td><code>login</code>、<code>401</code>、<code>404</code></td><td>登录、未授权、未找到页面。</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="card tight">
+            <h3>API 封装</h3>
+            <table class="compact-table">
+              <thead><tr><th>目录</th><th>主要接口</th></tr></thead>
+              <tbody>
+                <tr><td><code>api/auth</code></td><td>登录、注册、退出、用户名检查。</td></tr>
+                <tr><td><code>api/user</code></td><td>当前用户、头像、密码、用户列表、检测员角色、用户状态。</td></tr>
+                <tr><td><code>api/building</code></td><td>建筑 CRUD、按户主/地址查询、上传建筑图。</td></tr>
+                <tr><td><code>api/detection</code></td><td>创建任务、上传图片、启动检测、查询、取消、删除。</td></tr>
+                <tr><td><code>api/report</code></td><td>生成报告、报告详情、下载报告。</td></tr>
+                <tr><td><code>api/admin</code></td><td>仪表盘、操作日志、AI 模型。</td></tr>
+                <tr><td><code>api/ai</code></td><td>独立 AI 检测。</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <p class="small" style="margin-top: 14px;">联调提示：前端仍保留部分模板型 <code>/menus</code>、通用 <code>/files</code> 上传/删除 API 封装；当前后端实际落地的是 <code>/api/files/view</code> 文件预览代理，使用时应按后端现行接口对齐。</p>
+      </div>
+      <div></div>
+    </section>
+
+    <section class="slide" data-title="App 技术栈">
+      <div></div>
+      <div class="slide-inner">
+        <div class="eyebrow">Flutter App</div>
+        <h2>App 端框架拆解</h2>
+        <div class="grid cols-3" style="margin-top: 28px;">
+          <div class="card">
+            <h3>跨端框架</h3>
+            <ul class="list">
+              <li>Flutter + Dart，SDK 约束 <code>&gt;=3.2.0 &lt;4.0.0</code>。</li>
+              <li>支持 Android、iOS、Web、Windows 工程目录。</li>
+              <li>Material Design 与自定义主题 <code>app_theme</code>。</li>
+              <li>摄像头、相册、权限、路径、本地文件能力完整接入。</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>状态与路由</h3>
+            <ul class="list">
+              <li><code>flutter_riverpod</code> + Provider / Notifier 管理应用状态。</li>
+              <li><code>go_router</code> 声明式路由与登录重定向。</li>
+              <li><code>TokenManager</code> 维护 Token 与过期判断。</li>
+              <li><code>appContainer</code> 用于全局状态访问与会话过期处理。</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>数据与网络</h3>
+            <ul class="list">
+              <li><code>DioClient</code> 封装 GET/POST/PUT/DELETE/UPLOAD。</li>
+              <li><code>AuthInterceptor</code> 自动注入 Bearer Token。</li>
+              <li><code>json_serializable</code> 生成模型序列化代码。</li>
+              <li>Repository + RemoteDataSource 隔离接口细节。</li>
+            </ul>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 24px;">App 基础 API 地址通过编译参数 <code>APP_BASE_URL</code> 控制，默认 <code>http://localhost:8080</code>；业务接口常量统一集中在 <code>ApiConstants</code>。</div>
+      </div>
+      <div></div>
+    </section>
+
+    <section class="slide" data-title="App 架构">
+      <div></div>
+      <div class="slide-inner">
+        <div class="eyebrow">App Runtime Architecture</div>
+        <h2>App 端页面与分层架构</h2>
+        <div class="split">
+          <div class="card">
+            <h3>核心页面路径</h3>
+            <table class="compact-table">
+              <thead><tr><th>路径</th><th>页面能力</th></tr></thead>
+              <tbody>
+                <tr><td><code>/login</code> / <code>/register</code></td><td>登录注册，APP 端角色为 USER / INSPECTOR。</td></tr>
+                <tr><td><code>/home</code></td><td>首页统计、入口聚合。</td></tr>
+                <tr><td><code>/buildings</code> / <code>/building/:id</code></td><td>建筑列表、详情、创建、编辑、归档高危建筑。</td></tr>
+                <tr><td><code>/capture</code> / <code>/capture/ai-detection</code></td><td>拍摄、建筑选择、AI 检测入口。</td></tr>
+                <tr><td><code>/result</code> / <code>/result/:id</code></td><td>检测结果展示、结果图绘制。</td></tr>
+                <tr><td><code>/profile</code></td><td>个人中心、资料编辑、账号安全、通知、帮助。</td></tr>
+                <tr><td><code>/report</code> / <code>/report/:id</code></td><td>报告列表、报告详情与 Web 下载适配。</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="grid">
+            <div class="card accent">
+              <h3>分层方式</h3>
+              <ul class="list">
+                <li><code>core</code>：网络、路由、错误、主题、常量、工具、Token。</li>
+                <li><code>data</code>：models、sources、repositories，负责 DTO 与远端 API。</li>
+                <li><code>domain</code>：Task、DetectionReport 等领域实体。</li>
+                <li><code>presentation</code>：页面与自定义绘制，例如检测结果框绘制。</li>
+                <li><code>providers</code>：认证、检测、建筑、仪表盘、离线检测等状态。</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3>会话保护链路</h3>
+              <ul class="list">
+                <li>公开路径：登录、注册、用户名/手机号检查、健康检查。</li>
+                <li>非公开请求先检查 Token 是否过期，过期时触发会话失效处理。</li>
+                <li>401 响应会自动导航到登录页，并显示“登录已过期”。</li>
+                <li>手动退出时会短暂抑制重复 401 跳转，避免体验抖动。</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div></div>
+    </section>
+
+    <section class="slide" data-title="后端技术栈">
+      <div></div>
+      <div class="slide-inner">
+        <div class="eyebrow">Backend Framework</div>
+        <h2>后端框架拆解</h2>
+        <div class="grid cols-4" style="margin-top: 28px;">
+          <div class="card"><h3>Web/API</h3><div class="stack-list"><span>Spring Boot 3.2.0</span><span>Spring MVC REST Controller</span><span>统一 <code>Result&lt;T&gt;</code> 响应</span><span>SpringDoc OpenAPI 2.2</span></div></div>
+          <div class="card"><h3>安全</h3><div class="stack-list"><span>Spring Security</span><span>JWT jjwt 0.11.5</span><span>BCrypt 密码加密</span><span>方法级 <code>@PreAuthorize</code></span></div></div>
+          <div class="card"><h3>数据</h3><div class="stack-list"><span>MyBatis-Plus 3.5.3.1</span><span>MySQL Connector/J</span><span>Mapper XML + Java Mapper</span><span>逻辑删除与自动填充</span></div></div>
+          <div class="card"><h3>基础设施</h3><div class="stack-list"><span>Redis + Lettuce</span><span>OpenPDF 报告生成</span><span>Aliyun OSS SDK</span><span>Hutool 工具库</span><span>Spring AOP 操作日志</span></div></div>
+        </div>
+        <div class="two-table">
+          <div class="card tight">
+            <h3>服务配置</h3>
+            <table class="compact-table">
+              <tbody>
+                <tr><th>后端端口</th><td><code>8080</code></td></tr>
+                <tr><th>MySQL</th><td><code>localhost:3306/dangerhouse</code></td></tr>
+                <tr><th>Redis</th><td><code>127.0.0.1:6379</code>，database <code>5</code></td></tr>
+                <tr><th>AI 服务</th><td><code>http://127.0.0.1:8000/api/v1/detect_damage</code></td></tr>
+                <tr><th>Swagger</th><td><code>/api-docs</code>、<code>/swagger-ui.html</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="card tight">
+            <h3>关键配置能力</h3>
+            <table class="compact-table">
+              <tbody>
+                <tr><th>上传限制</th><td>单文件 10MB，请求 50MB。</td></tr>
+                <tr><th>JWT 有效期</th><td>普通登录 1 小时，rememberMe 3 天。</td></tr>
+                <tr><th>文件存储</th><td>默认本地 uploads，可通过 <code>ALIYUN_OSS_ENABLED</code> 切 OSS。</td></tr>
+                <tr><th>缓存策略</th><td>TTL 抖动、空值缓存、分布式互斥锁、Token 黑名单。</td></tr>
+                <tr><th>定时任务</th><td>每月 1 日 03:00 清理逻辑删除超过 90 天的数据。</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div></div>
+    </section>
+
+    <section class="slide" data-title="后端分层">
+      <div></div>
+      <div class="slide-inner">
+        <div class="eyebrow">Backend Layers</div>
+        <h2>后端内部架构与职责分层</h2>
+        <div class="architecture" style="grid-template-columns: repeat(4, minmax(0, 1fr));">
+          <div class="arch-node"><h3>Controller</h3><p>REST 接口层，承接 Web/App 请求，处理路径、参数、权限注解与统一响应。</p><div class="badge-row"><span class="tag">Auth</span><span class="tag">User</span><span class="tag">Building</span><span class="tag">Detection</span><span class="tag">Report</span><span class="tag">Admin</span><span class="tag">File</span><span class="tag">AI</span><span class="tag">Health</span></div></div>
+          <div class="arch-node core"><h3>Service</h3><p>业务编排层，处理角色规则、检测状态流、AI 调用、报告生成、数据范围与缓存失效。</p><div class="badge-row"><span class="tag">AuthService</span><span class="tag">DetectionService</span><span class="tag">ReportService</span><span class="tag">CacheService</span></div></div>
+          <div class="arch-node"><h3>Mapper / Entity</h3><p>MyBatis-Plus 数据访问层，实体对应 8 张核心表，Mapper XML 处理复杂查询。</p><div class="badge-row"><span class="tag blue">User</span><span class="tag blue">Role</span><span class="tag blue">Building</span><span class="tag blue">Detection</span><span class="tag blue">Image</span><span class="tag blue">Report</span></div></div>
+          <div class="arch-node"><h3>Infrastructure</h3><p>JWT、Redis、文件存储、PDF、OSS、AOP 日志、异步线程池、定时任务。</p><div class="badge-row"><span class="tag gold">JwtUtil</span><span class="tag gold">FileStorageService</span><span class="tag gold">PdfReportGenerator</span><span class="tag gold">OperationLogAspect</span></div></div>
+        </div>
+        <div class="callout" style="margin-top: 24px;">后端不是简单 CRUD：检测链路把文件、数据库、AI 微服务、图片结果、报告生成串成一个事务感很强的业务编排过程。</div>
+      </div>
+      <div></div>
+    </section>
+
+    <section class="slide" data-title="安全权限">
+      <div></div>
+      <div class="slide-inner">
+        <div class="eyebrow">Security & Permission</div>
+        <h2>鉴权、权限与数据边界</h2>
+        <div class="two-table">
+          <div class="card tight">
+            <h3>角色模型</h3>
+            <table>
+              <thead><tr><th>角色</th><th>入口</th><th>核心能力</th></tr></thead>
+              <tbody>
+                <tr><td><code>USER</code></td><td>App</td><td>注册登录、创建本人建筑、发起检测、查看本人检测和报告。</td></tr>
+                <tr><td><code>INSPECTOR</code></td><td>App</td><td>现场建档、查看共享建筑池、执行检测、查看全部检测记录。</td></tr>
+                <tr><td><code>ADMIN</code></td><td>Web</td><td>后台管理、仪表盘、用户管理、检测员设置、日志与全量数据查看。</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="card tight">
+            <h3>安全过滤链</h3>
+            <table>
+              <thead><tr><th>路径</th><th>权限策略</th></tr></thead>
+              <tbody>
+                <tr><td><code>/api/auth/**</code></td><td>放行，登录注册检查类接口。</td></tr>
+                <tr><td><code>/api/admin/**</code></td><td>必须 <code>ROLE_ADMIN</code>。</td></tr>
+                <tr><td><code>/api/files/**</code>、<code>/uploads/**</code></td><td>当前放行，用于文件预览与静态资源访问。</td></tr>
+                <tr><td><code>/api-docs/**</code>、<code>/swagger-ui/**</code></td><td>放行，接口文档访问。</td></tr>
+                <tr><td>其他接口</td><td>需要认证，并由 Controller 级 <code>@PreAuthorize</code> 细化。</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="timeline">
+          <div class="head">对象</div><div class="head">USER</div><div class="head">INSPECTOR</div><div class="head">ADMIN</div><div class="head">关键字段</div><div class="head">说明</div><div class="head">位置</div>
+          <div class="role">建筑</div><div>本人</div><div>共享池</div><div>全部</div><div><code>owner_user_id</code></div><div>普通用户数据归属判断</div><div><code>building</code></div>
+          <div class="role">检测</div><div>本人</div><div>全部</div><div>全部</div><div><code>user_id</code></div><div>检测记录发起人</div><div><code>detection</code></div>
+          <div class="role">报告</div><div>本人关联检测</div><div>全部</div><div>全部</div><div><code>detection_id</code></div><div>通过检测与建筑链路校验</div><div><code>report</code></div>
+        </div>
+      </div>
+      <div></div>
+    </section>
+
+    <section class="slide" data-title="接口矩阵一">
+      <div></div>
+      <div class="slide-inner">
+        <div class="eyebrow">API Matrix I</div>
+        <h2>主要接口矩阵：认证、用户、建筑、检测</h2>
+        <div class="table-scroll" style="margin-top: 26px;">
+          <table class="compact-table">
+            <thead><tr><th>模块</th><th>方法</th><th>路径</th><th>权限</th><th>说明</th></tr></thead>
+            <tbody>
+              <tr><td>认证</td><td>POST</td><td><code>/api/auth/login</code></td><td>公开</td><td>用户名/手机号/邮箱登录，支持 APP / WEB 端限制。</td></tr>
+              <tr><td>认证</td><td>POST</td><td><code>/api/auth/register</code></td><td>公开</td><td>新用户注册，默认普通用户。</td></tr>
+              <tr><td>认证</td><td>POST</td><td><code>/api/auth/logout</code></td><td>登录</td><td>Token 加入黑名单。</td></tr>
+              <tr><td>认证</td><td>GET</td><td><code>/api/auth/check-username/{username}</code></td><td>公开</td><td>用户名可用性检查。</td></tr>
+              <tr><td>认证</td><td>GET</td><td><code>/api/auth/check-phone/{phone}</code></td><td>公开</td><td>手机号可用性检查。</td></tr>
+              <tr><td>用户</td><td>GET</td><td><code>/api/user/profile</code></td><td>USER/INSPECTOR/ADMIN</td><td>当前用户信息。</td></tr>
+              <tr><td>用户</td><td>PUT</td><td><code>/api/user/profile</code></td><td>USER/INSPECTOR/ADMIN</td><td>更新个人资料。</td></tr>
+              <tr><td>用户</td><td>PUT</td><td><code>/api/user/password</code></td><td>USER/INSPECTOR/ADMIN</td><td>修改密码。</td></tr>
+              <tr><td>用户</td><td>POST</td><td><code>/api/user/avatar</code></td><td>USER/INSPECTOR/ADMIN</td><td>上传头像。</td></tr>
+              <tr><td>用户</td><td>GET</td><td><code>/api/users</code></td><td>ADMIN</td><td>用户列表。</td></tr>
+              <tr><td>用户</td><td>GET</td><td><code>/api/users/{id}</code></td><td>ADMIN</td><td>用户详情。</td></tr>
+              <tr><td>用户</td><td>PUT</td><td><code>/api/users/{userId}/inspector</code></td><td>ADMIN</td><td>设置或取消检测员。</td></tr>
+              <tr><td>用户</td><td>PUT</td><td><code>/api/users/{userId}/status</code></td><td>ADMIN</td><td>启用/禁用用户。</td></tr>
+              <tr><td>建筑</td><td>GET</td><td><code>/api/buildings</code></td><td>USER/INSPECTOR/ADMIN</td><td>建筑分页列表，按角色控制数据范围。</td></tr>
+              <tr><td>建筑</td><td>POST</td><td><code>/api/buildings</code></td><td>USER/INSPECTOR/ADMIN</td><td>创建建筑档案。</td></tr>
+              <tr><td>建筑</td><td>GET</td><td><code>/api/buildings/{id}</code></td><td>USER/INSPECTOR/ADMIN</td><td>建筑详情。</td></tr>
+              <tr><td>建筑</td><td>PUT</td><td><code>/api/buildings/{id}</code></td><td>USER/INSPECTOR/ADMIN</td><td>更新建筑信息。</td></tr>
+              <tr><td>建筑</td><td>DELETE</td><td><code>/api/buildings/{id}</code></td><td>INSPECTOR/ADMIN</td><td>删除建筑档案及关联检测。</td></tr>
+              <tr><td>建筑</td><td>GET</td><td><code>/api/buildings/by-owner</code></td><td>USER/INSPECTOR/ADMIN</td><td>按业主姓名查询。</td></tr>
+              <tr><td>建筑</td><td>GET</td><td><code>/api/buildings/by-address</code></td><td>USER/INSPECTOR/ADMIN</td><td>按地址查询。</td></tr>
+              <tr><td>建筑</td><td>POST</td><td><code>/api/buildings/{id}/image</code></td><td>USER/INSPECTOR/ADMIN</td><td>上传建筑图片。</td></tr>
+              <tr><td>检测</td><td>POST</td><td><code>/api/detections</code></td><td>USER/INSPECTOR/ADMIN</td><td>创建检测任务。</td></tr>
+              <tr><td>检测</td><td>POST</td><td><code>/api/detections/{id}/images</code></td><td>USER/INSPECTOR/ADMIN</td><td>上传多张检测图片。</td></tr>
+              <tr><td>检测</td><td>POST</td><td><code>/api/detections/{id}/start</code></td><td>USER/INSPECTOR/ADMIN</td><td>触发 AI 分析流程。</td></tr>
+              <tr><td>检测</td><td>GET</td><td><code>/api/detections/{id}</code></td><td>USER/INSPECTOR/ADMIN</td><td>检测详情与结果。</td></tr>
+              <tr><td>检测</td><td>GET</td><td><code>/api/detections/{id}/images</code></td><td>USER/INSPECTOR/ADMIN</td><td>检测图片列表。</td></tr>
+              <tr><td>检测</td><td>GET</td><td><code>/api/detections</code></td><td>USER/INSPECTOR/ADMIN</td><td>检测列表，支持分页筛选。</td></tr>
+              <tr><td>检测</td><td>PUT</td><td><code>/api/detections/{id}/cancel</code></td><td>USER/INSPECTOR/ADMIN</td><td>取消检测。</td></tr>
+              <tr><td>检测</td><td>DELETE</td><td><code>/api/detections/{id}</code></td><td>USER/INSPECTOR/ADMIN</td><td>逻辑删除检测任务。</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div></div>
+    </section>
+
+    <section class="slide" data-title="接口矩阵二">
+      <div></div>
+      <div class="slide-inner">
+        <div class="eyebrow">API Matrix II</div>
+        <h2>主要接口矩阵：AI、报告、管理、文件、健康</h2>
+        <div class="two-table">
+          <div class="card tight">
+            <h3>接口清单</h3>
+            <table class="compact-table">
+              <thead><tr><th>模块</th><th>方法</th><th>路径</th><th>权限</th><th>说明</th></tr></thead>
+              <tbody>
+                <tr><td>AI</td><td>POST</td><td><code>/api/ai/detect</code></td><td>USER/INSPECTOR/ADMIN</td><td>独立上传图片并直接运行 AI 检测。</td></tr>
+                <tr><td>报告</td><td>POST</td><td><code>/api/reports/generate</code></td><td>USER/INSPECTOR/ADMIN</td><td>生成正式检测报告。</td></tr>
+                <tr><td>报告</td><td>GET</td><td><code>/api/reports/{id}</code></td><td>USER/INSPECTOR/ADMIN</td><td>报告详情。</td></tr>
+                <tr><td>报告</td><td>GET</td><td><code>/api/reports/{id}/download</code></td><td>USER/INSPECTOR/ADMIN</td><td>下载 PDF 报告文件流。</td></tr>
+                <tr><td>后台</td><td>GET</td><td><code>/api/admin/dashboard</code></td><td>ADMIN</td><td>用户、建筑、检测、高风险统计。</td></tr>
+                <tr><td>后台</td><td>GET</td><td><code>/api/admin/operation-logs</code></td><td>ADMIN</td><td>操作日志分页筛选。</td></tr>
+                <tr><td>后台</td><td>GET</td><td><code>/api/admin/models</code></td><td>ADMIN</td><td>AI 模型列表。</td></tr>
+                <tr><td>文件</td><td>GET</td><td><code>/api/files/view</code></td><td>公开</td><td>通过后端代理以内联方式预览文件。</td></tr>
+                <tr><td>系统</td><td>GET</td><td><code>/api/health</code></td><td>公开</td><td>检查 API、数据库和 AI 服务状态。</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="grid">
+            <div class="card accent">
+              <h3>统一响应约定</h3>
+              <div class="codebox">{
+  "code": 200,
+  "message": "success",
+  "data": {},
+  "timestamp": 1710000000,
+  "requestId": "..."
+}</div>
+            </div>
+            <div class="card">
+              <h3>接口文档入口</h3>
+              <ul class="list">
+                <li>后端落地文档：<code>dangerhouse-backend/后端接口文档_v3.2.md</code>。</li>
+                <li>Swagger UI：<code>http://localhost:8080/swagger-ui.html</code>。</li>
+                <li>OpenAPI JSON：<code>http://localhost:8080/api-docs</code>。</li>
+                <li>认证方式：<code>Authorization: Bearer {token}</code>。</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div></div>
+    </section>
+
+    <section class="slide" data-title="检测链路接口">
+      <div></div>
+      <div class="slide-inner">
+        <div class="eyebrow">Detection APIs</div>
+        <h2>检测主链路的接口编排</h2>
+        <div class="flow">
+          <div class="flow-step"><div class="idx">1</div><strong>创建任务</strong><span><code>POST /api/detections</code><br />参数：buildingId、description</span></div>
+          <div class="flow-step"><div class="idx">2</div><strong>上传图片</strong><span><code>POST /api/detections/{id}/images</code><br />multipart: images[]</span></div>
+          <div class="flow-step"><div class="idx">3</div><strong>启动 AI</strong><span><code>POST /api/detections/{id}/start</code><br />任务进入 PROCESSING</span></div>
+          <div class="flow-step"><div class="idx">4</div><strong>查询结果</strong><span><code>GET /api/detections/{id}</code><br />返回 images、report、riskLevel</span></div>
+          <div class="flow-step"><div class="idx">5</div><strong>生成报告</strong><span><code>POST /api/reports/generate</code><br />format: PDF / DOCX</span></div>
+          <div class="flow-step"><div class="idx">6</div><strong>下载报告</strong><span><code>GET /api/reports/{id}/download</code><br />返回文件流</span></div>
+        </div>
+        <div class="two-table">
+          <div class="card tight">
+            <h3>检测结果关键字段</h3>
+            <table class="compact-table">
+              <tbody>
+                <tr><th><code>status</code></th><td>CREATED / READY / PROCESSING / COMPLETED / FAILED / CANCELLED。</td></tr>
+                <tr><th><code>crackCount</code></th><td>裂缝数量。</td></tr>
+                <tr><th><code>damageRatio</code></th><td>损伤面积占比。</td></tr>
+                <tr><th><code>riskLevel</code></th><td>A/B/C/D 风险等级。</td></tr>
+                <tr><th><code>confidence</code></th><td>模型平均置信度。</td></tr>
+                <tr><th><code>detectResult</code></th><td>完整 AI JSON 结果。</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="card tight">
+            <h3>图片与报告字段</h3>
+            <table class="compact-table">
+              <tbody>
+                <tr><th><code>imagePath</code></th><td>原始图片路径。</td></tr>
+                <tr><th><code>resultImagePath</code></th><td>AI 标注后的结果图路径。</td></tr>
+                <tr><th><code>reportNo</code></th><td>报告编号，如 RPT20260415001。</td></tr>
+                <tr><th><code>filePath</code></th><td>报告文件路径。</td></tr>
+                <tr><th><code>downloadUrl</code></th><td>报告下载 API 路径。</td></tr>
+                <tr><th><code>generatedAt</code></th><td>报告生成时间。</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div></div>
+    </section>
+
+    <section class="slide" data-title="AI 技术栈">
+      <div></div>
+      <div class="slide-inner">
+        <div class="eyebrow">AI Service</div>
+        <h2>AI 检测服务框架拆解</h2>
+        <div class="grid cols-3" style="margin-top: 28px;">
+          <div class="card">
+            <h3>服务层</h3>
+            <ul class="list">
+              <li>FastAPI 应用，服务标题 <code>Building Damage Detection API</code>，版本 <code>2.1.0</code>。</li>
+              <li>Uvicorn 启动，监听 <code>0.0.0.0:8000</code>。</li>
+              <li>CORS 全开放，方便后端/调试端联调。</li>
+              <li>Pydantic 定义请求响应模型，便于与 Java DTO 对齐。</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>模型层</h3>
+            <ul class="list">
+              <li>TorchVision <code>fasterrcnn_resnet50_fpn_v2</code>。</li>
+              <li>分类头替换为 2 类：背景 + 裂缝。</li>
+              <li>权重路径 <code>./runs_detect/best.pt</code>。</li>
+              <li>设备自动选择 <code>cuda</code> 或 <code>cpu</code>。</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>算法层</h3>
+            <ul class="list">
+              <li>OpenCV 解码、绘制红色检测框与置信度。</li>
+              <li>单图计算裂缝数、面积占比、平均置信度。</li>
+              <li>多图使用 DBSCAN 对中心点做空间去重。</li>
+              <li>输出 Base64 结果图，后端再保存为文件。</li>
+            </ul>
+          </div>
+        </div>
+        <div class="codebox" style="margin-top: 22px;">POST /api/v1/detect_damage
+multipart/form-data:
+  images: UploadFile[]
+  score_thr: float = 0.3
+
+response.data:
+  analysis: { severityLevel, damageRatio, crackCount, confidenceScore, recommendation }
+  detections: [{ type: "crack", confidence, bbox, center, width, height, area }]
+  imageResults: [{ filename, detections, resultImage, analysis }]
+  resultImage: base64</div>
+      </div>
+      <div></div>
+    </section>
+
+    <section class="slide" data-title="AI 风险算法">
+      <div></div>
+      <div class="slide-inner">
+        <div class="eyebrow">AI Risk Logic</div>
+        <h2>AI 检测与风险评级逻辑</h2>
+        <div class="flow">
+          <div class="flow-step"><div class="idx">1</div><strong>读取图片</strong><span>UploadFile → bytes → NumPy → OpenCV BGR。</span></div>
+          <div class="flow-step"><div class="idx">2</div><strong>预处理</strong><span>BGR 转 RGB，转换 Tensor，归一化到 0-1。</span></div>
+          <div class="flow-step"><div class="idx">3</div><strong>模型推理</strong><span>Faster R-CNN 输出 boxes / scores。</span></div>
+          <div class="flow-step"><div class="idx">4</div><strong>阈值过滤</strong><span>默认 <code>score_thr=0.3</code>。</span></div>
+          <div class="flow-step"><div class="idx">5</div><strong>结果绘制</strong><span>OpenCV 画框，编码 JPG Base64。</span></div>
+          <div class="flow-step"><div class="idx">6</div><strong>风险聚合</strong><span>DBSCAN 去重后取更高风险维度。</span></div>
+        </div>
+        <div class="two-table">
+          <div class="card tight">
+            <h3>风险等级阈值</h3>
+            <table class="compact-table">
+              <thead><tr><th>等级</th><th>裂缝数量</th><th>损伤比例</th><th>建议</th></tr></thead>
+              <tbody>
+                <tr><td>A</td><td>&lt; 3</td><td>&lt; 5%</td><td>结构安全，无需处理。</td></tr>
+                <tr><td>B</td><td>≥ 3</td><td>≥ 5%</td><td>存在轻微损伤，建议定期观察。</td></tr>
+                <tr><td>C</td><td>≥ 6</td><td>≥ 15%</td><td>局部危房，建议修缮加固。</td></tr>
+                <tr><td>D</td><td>&gt; 10</td><td>&gt; 30%</td><td>立即停止使用并由专业机构鉴定。</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="card tight">
+            <h3>后端如何消费 AI 结果</h3>
+            <ul class="list">
+              <li>后端将上传图片交给 AI 服务，并接收整体分析与单图结果。</li>
+              <li>Base64 结果图通过 <code>FileStorageService.saveBase64Image</code> 保存。</li>
+              <li>聚合字段写回 <code>detection</code>：裂缝数、损伤比例、风险等级、置信度、检测时间。</li>
+              <li>单图结果路径写回 <code>image.result_image_path</code>，供 App/Web 展示。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div></div>
+    </section>
+
+    <section class="slide" data-title="数据架构">
+      <div></div>
+      <div class="slide-inner">
+        <div class="eyebrow">Data Architecture</div>
+        <h2>数据库模型与核心关系</h2>
+        <div class="split">
+          <div class="codebox">user ─── user_role ─── role
+  │
+  └── detection ─── image
+          │
+          └── report
+
+building ─── detection
+    │
+    └── report</div>
+          <div class="card">
+            <h3>数据库基础信息</h3>
+            <ul class="list">
+              <li>数据库名称：<code>dangerhouse</code>。</li>
+              <li>数据库版本目标：MySQL 8.0+。</li>
+              <li>字符集：<code>utf8mb4</code>，排序规则 <code>utf8mb4_0900_ai_ci</code>。</li>
+              <li>存储引擎：InnoDB。</li>
+              <li>所有核心业务表使用自增 <code>id</code> 主键。</li>
+              <li>建筑、检测、图片、报告等业务表具备逻辑删除字段 <code>deleted</code>。</li>
+            </ul>
+          </div>
+        </div>
+        <div class="table-scroll" style="margin-top: 22px; max-height: 36vh;">
+          <table class="compact-table">
+            <thead><tr><th>表</th><th>中文名</th><th>关键字段</th><th>职责</th></tr></thead>
+            <tbody>
+              <tr><td><code>user</code></td><td>用户表</td><td>username、password、phone、email、status、lastLogin</td><td>系统用户与账号状态。</td></tr>
+              <tr><td><code>role</code></td><td>角色表</td><td>roleName、roleCode</td><td>ADMIN / INSPECTOR / USER 角色定义。</td></tr>
+              <tr><td><code>user_role</code></td><td>用户角色表</td><td>userId、roleId</td><td>用户与角色多对多关系。</td></tr>
+              <tr><td><code>building</code></td><td>建筑档案表</td><td>name、address、structureType、ownerUserId、createdBy、assignedInspectorId</td><td>建筑基础信息、归属和检测员跟进。</td></tr>
+              <tr><td><code>detection</code></td><td>AI 检测表</td><td>buildingId、userId、status、crackCount、damageRatio、riskLevel、detectResult</td><td>检测任务状态与聚合结果。</td></tr>
+              <tr><td><code>image</code></td><td>检测图片表</td><td>detectionId、imagePath、resultImagePath、imageType</td><td>原图与结果图路径。</td></tr>
+              <tr><td><code>report</code></td><td>检测报告表</td><td>detectionId、buildingId、reportNo、filePath、fileType</td><td>正式报告文件记录。</td></tr>
+              <tr><td><code>operation_log</code></td><td>操作日志表</td><td>userId、operation、method、params、result、ip、status</td><td>AOP 记录后台/业务操作。</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div></div>
+    </section>
+
+    <section class="slide" data-title="存储缓存日志">
+      <div></div>
+      <div class="slide-inner">
+        <div class="eyebrow">Storage / Cache / Logs</div>
+        <h2>存储、缓存、日志与后台任务</h2>
+        <div class="grid cols-4" style="margin-top: 28px;">
+          <div class="card">
+            <h3>文件存储</h3>
+            <ul class="list">
+              <li><code>FileStorageService</code> 抽象本地/OSS。</li>
+              <li>本地默认 <code>uploads</code>，URL 前缀 <code>/uploads</code>。</li>
+              <li>支持图片、结果图、PDF、Base64 图片、临时文件。</li>
+              <li>OSS 由 <code>ALIYUN_OSS_ENABLED</code> 等环境变量控制。</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Redis 缓存</h3>
+            <ul class="list">
+              <li>JSON 序列化，支持 Java 8 时间类型。</li>
+              <li>缓存穿透：空值缓存。</li>
+              <li>缓存击穿：分布式锁 + Lua 解锁。</li>
+              <li>缓存雪崩：TTL 随机抖动。</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>操作日志</h3>
+            <ul class="list">
+              <li><code>@Log</code> 注解标记业务操作。</li>
+              <li><code>OperationLogAspect</code> AOP 采集参数、结果、IP、状态。</li>
+              <li><code>operationLogExecutor</code> 异步写入。</li>
+              <li>管理员可通过 <code>/api/admin/operation-logs</code> 查询。</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>定时清理</h3>
+            <ul class="list">
+              <li><code>@EnableScheduling</code> 开启调度。</li>
+              <li>每月 1 日 03:00 执行。</li>
+              <li>清理逻辑删除超过 90 天的数据。</li>
+              <li>覆盖 image、report、detection、building。</li>
+            </ul>
+          </div>
+        </div>
+        <div class="callout" style="margin-top: 24px;">缓存设计已经不只是“加 Redis”：代码中明确处理了穿透、击穿、雪崩和 Redis 不可用时的降级回源，这一点在答辩或项目介绍里很加分。</div>
+      </div>
+      <div></div>
+    </section>
+
+    <section class="slide" data-title="部署运行">
+      <div></div>
+      <div class="slide-inner">
+        <div class="eyebrow">Runtime & Deployment</div>
+        <h2>本地运行与部署拓扑</h2>
+        <div class="two-table">
+          <div class="card tight">
+            <h3>端口与服务</h3>
+            <table>
+              <thead><tr><th>服务</th><th>默认地址</th><th>说明</th></tr></thead>
+              <tbody>
+                <tr><td>Spring Boot API</td><td><code>http://localhost:8080</code></td><td>统一后端服务。</td></tr>
+                <tr><td>Vue Admin Dev</td><td><code>http://localhost:9090</code></td><td>Vite 配置固定开发端口。</td></tr>
+                <tr><td>FastAPI AI</td><td><code>http://127.0.0.1:8000</code></td><td>AI 推理服务。</td></tr>
+                <tr><td>MySQL</td><td><code>localhost:3306/dangerhouse</code></td><td>业务数据库。</td></tr>
+                <tr><td>Redis</td><td><code>127.0.0.1:6379/5</code></td><td>缓存、锁、Token 黑名单。</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="card tight">
+            <h3>构建与启动</h3>
+            <table>
+              <thead><tr><th>模块</th><th>命令 / 方式</th></tr></thead>
+              <tbody>
+                <tr><td>后端</td><td><code>./mvnw spring-boot:run</code> 或 Maven 打包运行。</td></tr>
+                <tr><td>Web</td><td><code>pnpm dev</code>、<code>pnpm build:prod</code>。</td></tr>
+                <tr><td>App</td><td><code>flutter run</code>，可传 <code>--dart-define=APP_BASE_URL=...</code>。</td></tr>
+                <tr><td>AI</td><td><code>python api_server.py</code>，依赖 <code>requirements.txt</code>。</td></tr>
+                <tr><td>数据库</td><td>执行 <code>dangerhouse_v3.0.sql</code> 或含数据脚本。</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="architecture" style="grid-template-columns: repeat(5, minmax(0, 1fr));">
+          <div class="arch-node"><h3>Client</h3><p>App / Web</p></div>
+          <div class="arch-node core"><h3>API</h3><p>Spring Boot 8080</p></div>
+          <div class="arch-node"><h3>DB</h3><p>MySQL 8</p></div>
+          <div class="arch-node"><h3>Cache</h3><p>Redis</p></div>
+          <div class="arch-node"><h3>AI</h3><p>FastAPI 8000</p></div>
+        </div>
+      </div>
+      <div></div>
+    </section>
+
+    <section class="slide" data-title="专业结论">
+      <div></div>
+      <div class="slide-inner">
+        <div class="eyebrow">Professional Summary</div>
+        <h2>系统专业总结与可优化方向</h2>
+        <div class="grid cols-3" style="margin-top: 28px;">
+          <div class="card accent">
+            <h3>架构成熟点</h3>
+            <ul class="list">
+              <li>多端职责清晰：App 现场业务、Web 管理后台、后端统一编排、AI 独立推理。</li>
+              <li>权限模型完整：USER / INSPECTOR / ADMIN 对入口和数据范围都有约束。</li>
+              <li>检测链路完整：建档、上传、AI、结果、报告形成闭环。</li>
+              <li>缓存、日志、定时清理、文件存储抽象等工程能力已具备。</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>联调关注点</h3>
+            <ul class="list">
+              <li>Web 模板遗留接口与后端现行接口需要保持文档同步。</li>
+              <li>AI 服务权重 <code>best.pt</code> 不存在时会退化为初始模型，应部署前校验。</li>
+              <li>文件预览路径当前放行，生产环境建议结合访问控制和签名 URL。</li>
+              <li>默认数据库/Redis 密码在配置中直接出现，生产应全部环境变量化。</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>后续增强</h3>
+            <ul class="list">
+              <li>引入统一 OpenAPI 生成前端/移动端类型，减少接口漂移。</li>
+              <li>AI 推理任务可异步化，增加队列与进度通知。</li>
+              <li>报告生成可扩展 DOCX 模板和电子签章。</li>
+              <li>补充 Docker Compose，一键启动 MySQL、Redis、后端、AI 和 Web。</li>
+            </ul>
+          </div>
+        </div>
+        <p class="large-note" style="margin-top: 32px;">这个系统的核心价值不是单点技术，而是把“现场采集、后台管理、业务数据、AI 研判、报告交付”串成了一条完整的工程闭环。</p>
+      </div>
+      <div></div>
+    </section>
+
+    <section class="slide" data-title="结束">
+      <div></div>
+      <div class="slide-inner">
+        <div class="eyebrow">The End</div>
+        <h1>危房智诊系统<br />架构拆解完成</h1>
+        <p class="subtitle">可直接用浏览器打开本 HTML 进行演示，也可以使用浏览器打印功能导出 PDF。建议演示时按“全局架构 → 分端技术 → 核心接口 → 数据模型 → 专业总结”的节奏讲解。</p>
+        <div class="hero-line">
+          <span class="pill">键盘 <strong>← / →</strong> 翻页</span>
+          <span class="pill"><strong>Home / End</strong> 首尾页</span>
+          <span class="pill"><strong>P</strong> 打印或导出 PDF</span>
+        </div>
+      </div>
+      <div></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div>危房智诊系统技术架构 PPT</div>
+    <div class="nav">
+      <button id="prevBtn" type="button">上一页</button>
+      <span><span class="slide-number" id="currentNo">01</span> / <span id="totalNo">25</span></span>
+      <button id="nextBtn" type="button">下一页</button>
+      <button id="printBtn" type="button">打印 / PDF</button>
+    </div>
+  </footer>
+
+  <script>
+    const slides = Array.from(document.querySelectorAll(".slide"));
+    const progressBar = document.getElementById("progressBar");
+    const currentNo = document.getElementById("currentNo");
+    const totalNo = document.getElementById("totalNo");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const printBtn = document.getElementById("printBtn");
+    let index = 0;
+
+    slides.forEach((slide, i) => {
+      slide.id = `slide-${i + 1}`;
+    });
+
+    totalNo.textContent = String(slides.length).padStart(2, "0");
+
+    function showSlide(nextIndex) {
+      index = Math.max(0, Math.min(slides.length - 1, nextIndex));
+      slides.forEach((slide, i) => slide.classList.toggle("active", i === index));
+      currentNo.textContent = String(index + 1).padStart(2, "0");
+      progressBar.style.width = `${((index + 1) / slides.length) * 100}%`;
+      document.title = `${String(index + 1).padStart(2, "0")} / ${slides.length} - ${slides[index].dataset.title || "危房智诊系统技术架构 PPT"}`;
+      history.replaceState(null, "", `#slide-${index + 1}`);
+    }
+
+    function next() {
+      showSlide(index + 1);
+    }
+
+    function prev() {
+      showSlide(index - 1);
+    }
+
+    prevBtn.addEventListener("click", prev);
+    nextBtn.addEventListener("click", next);
+    printBtn.addEventListener("click", () => window.print());
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowRight" || event.key === "PageDown" || event.key === " ") {
+        event.preventDefault();
+        next();
+      }
+      if (event.key === "ArrowLeft" || event.key === "PageUp") {
+        event.preventDefault();
+        prev();
+      }
+      if (event.key === "Home") {
+        event.preventDefault();
+        showSlide(0);
+      }
+      if (event.key === "End") {
+        event.preventDefault();
+        showSlide(slides.length - 1);
+      }
+      if (event.key.toLowerCase() === "p") {
+        window.print();
+      }
+    });
+
+    window.addEventListener("hashchange", () => {
+      const match = location.hash.match(/slide-(\d+)/);
+      if (match) showSlide(Number(match[1]) - 1);
+    });
+
+    const initialMatch = location.hash.match(/slide-(\d+)/);
+    showSlide(initialMatch ? Number(initialMatch[1]) - 1 : 0);
+  </script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleURLTypes</key>
+    <dict>
+        <key>CFBundleTypeRole</key>
+        <string>Editor</string>
+        <key>CFBundleURLSchemes</key>
+        <array>
+            <string>dangerhouse</string>
+        </array>
+    </dict>
+    <key>dangerhouse</key>
+    <dict>
+        <key>CFBundleTypeRole</key>
+        <string>Editor</string>
+        <key>CFBundleURLName</key>
+        <string>dangerhouse scheme</string>
+        <key>CFBundleURLSchemes</key>
+        <array>
+            <string>dangerhouse</string>
+        </array>
+    </dict>
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleTypeName</key>
+            <string>Default</string>
+            <key>LSHandlerRank</key>
+            <integer>0</integer>
+            <key>LSApplicationQueriesSchemes</key>
+            <array>
+                <string>dangerhouse</string>
+            </array>
+        </dict>
+        <dict>
+            <key>CFBundleTypeName</key>
+            <string>View</string>
+            <key>LSHandlerRank</key>
+            <integer>2</integer>
+            <key>LSApplicationQueriesSchemes</key>
+            <array>
+                <string>dangerhouse</string>
+            </array>
+        </dict>
+    </array>
+</dict>
+</plist>

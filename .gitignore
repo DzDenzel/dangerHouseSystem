@@ -1,0 +1,64 @@
+# Local IDE and assistant settings
+.idea/
+.vscode/
+.claude/
+*.iml
+*.ipr
+*.iws
+
+# Temporary local directories
+_tmp_flutter/
+
+# Java and Maven build/cache output
+**/target/
+**/.m2/
+*.class
+*.log
+
+# Node.js and Vue build/dependency output
+**/node_modules/
+**/dist/
+**/dist-ssr/
+**/.pnpm-store/
+**/coverage/
+**/.history/
+**/*.local
+
+# Flutter, Dart, Gradle, and Android local output
+**/.dart_tool/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/.packages
+**/.pub-cache/
+**/.pub/
+**/build/
+**/android/.gradle/
+**/android/local.properties
+**/android/key.properties
+**/ios/Flutter/ephemeral/
+**/macos/Flutter/ephemeral/
+**/windows/flutter/ephemeral/
+**/*.keystore
+**/*.jks
+
+# Python caches and virtual environments
+**/__pycache__/
+**/*.py[cod]
+**/.pytest_cache/
+**/.venv/
+**/venv/
+**/env/
+**/.env
+
+# AI datasets and model artifacts
+dangerhouse-ai-service/HRCDS/
+dangerhouse-ai-service/runs_detect/
+**/*.pt
+**/*.pth
+
+# Runtime files
+dangerhouse-backend/uploads/
+
+# Operating-system files
+.DS_Store
+Thumbs.db

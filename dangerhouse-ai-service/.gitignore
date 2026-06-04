@@ -1,0 +1,21 @@
+# PyTorch/Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+env/
+.env
+
+# Project specific
+runs_detect/
+HRCDS/
+.idea/
+
+# Large files
+*.pt
+*.pth
+*.zip
+*.tar.gz
+*.7z

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dz.dangerhouse.mapper.UserRoleMapper">
+
+    <!-- 批量插入用户角色关联 -->
+    <insert id="batchInsert" parameterType="java.util.List">
+        INSERT INTO user_role (user_id, role_id, created_at)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.userId}, #{item.roleId}, NOW())
+        </foreach>
+    </insert>
+
+</mapper>

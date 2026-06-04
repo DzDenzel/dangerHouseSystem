@@ -1,0 +1,122 @@
+# 服务器配置
+server:
+  port: 8080  # 服务端口号
+
+# 应用自定义配置
+app:
+  base-url: http://localhost:8080  # 应用基础URL，用于生成文件访问链接
+  # 缓存配置
+  cache:
+    default-ttl-minutes: 10          # 默认缓存时间（分钟）
+    dashboard-ttl-minutes: 5         # 仪表盘缓存时间（分钟）
+    auth-user-ttl-minutes: 60        # 认证用户缓存时间（分钟）
+    null-value-ttl-seconds: 120      # 空值缓存时间（秒，防穿透）
+    mutex-lock-ttl-seconds: 10       # 分布式锁超时时间（秒）
+    mutex-retry-delay-millis: 50     # 锁重试延迟（毫秒）
+    mutex-max-retries: 20            # 锁最大重试次数
+    ttl-jitter-seconds: 300          # TTL抖动时间（秒，防雪崩）
+    dashboard-key: "dashboard:data"  # 仪表盘缓存键
+    user-detail-prefix: "user:detail:"           # 用户详情前缀
+    auth-user-prefix: "auth:user:"               # 认证用户前缀
+    token-blacklist-prefix: "auth:token:blacklist:"  # Token黑名单前缀
+    lock-prefix: "lock:cache:"       # 分布式锁前缀
+    user-list-prefix: "user:list:"   # 用户列表前缀
+    building-detail-prefix: "building:detail:"   # 建筑详情前缀
+    building-list-prefix: "building:list:"       # 建筑列表前缀
+    detection-detail-prefix: "detection:detail:" # 检测详情前缀
+    detection-list-prefix: "detection:list:"     # 检测列表前缀
+    report-detail-prefix: "report:detail:"       # 报告详情前缀
+
+# Spring框架配置
+spring:
+  application:
+    name: dangerhouse-backend  # 应用名称
+  # 文件上传配置
+  servlet:
+    multipart:
+      max-file-size: 10MB  # 单个文件最大大小
+      max-request-size: 50MB  # 单次请求最大大小
+  mvc:
+    throw-exception-if-no-handler-found: true  # 未找到处理器时抛出异常
+  web:
+    resources:
+      add-mappings: false  # 禁用默认静态资源映射，使用自定义文件控制器
+  # 数据库配置
+  datasource:
+    url: jdbc:mysql://localhost:3306/dangerhouse?serverTimezone=Asia/Shanghai&useSSL=false&characterEncoding=utf8  # 数据库连接URL
+    username: root  # 数据库用户名
+    password: root  # 数据库密码
+    driver-class-name: com.mysql.cj.jdbc.Driver  # MySQL驱动类
+  main:
+    allow-bean-definition-overriding: true  # 允许Bean定义覆盖
+  # Redis配置
+  data:
+    redis:
+      host: 127.0.0.1  # Redis服务器地址
+      port: 6379  # Redis端口
+      password: root  # Redis密码
+      database: 5  # Redis数据库索引
+      timeout: 5000ms  # 连接超时时间
+      lettuce:
+        pool:
+          max-active: 8  # 连接池最大活跃连接数
+          max-wait: -1ms  # 连接池最大等待时间（-1表示无限制）
+          max-idle: 8  # 连接池最大空闲连接数
+          min-idle: 0  # 连接池最小空闲连接数
+
+# MyBatis-Plus配置
+mybatis-plus:
+  mapper-locations: classpath:mapper/*.xml  # Mapper XML文件位置
+  configuration:
+    map-underscore-to-camel-case: true  # 下划线转驼峰命名
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl  # SQL日志输出到控制台
+  global-config:
+    db-config:
+      id-type: auto  # 主键自增策略
+
+# JWT配置
+jwt:
+  secret: dangerhouse-very-long-secret-key-for-jwt-token-generation-that-must-be-at-least-512-bits-long-to-meet-security-requirements-2024  # JWT签名密钥（至少512位）
+  expiration: 3600  # 普通登录Token有效期（秒），1小时
+  remember-expiration: 259200  # 记住我登录Token有效期（秒），3天
+  header: Authorization  # Token请求头名称
+  token-prefix: Bearer  # Token前缀
+
+# 日志配置
+logging:
+  level:
+    root: info  # 根日志级别
+    com.dz.dangerhouse: debug  # 项目包日志级别
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"  # 控制台日志格式
+
+# API文档配置（Swagger）
+springdoc:
+  api-docs:
+    path: /api-docs  # OpenAPI JSON文档路径
+  swagger-ui:
+    path: /swagger-ui.html  # Swagger UI页面路径
+  packages-to-scan: com.dz.dangerhouse.controller  # 扫描的Controller包路径
+
+# AI检测服务配置
+ai:
+  detection:
+    url: http://127.0.0.1:8000/api/v1/detect_damage  # Python AI微服务地址
+
+# 文件上传配置
+file:
+  upload:
+    base-dir: uploads  # 本地文件存储根目录（相对于项目运行目录）
+    url-prefix: /uploads  # 文件访问URL前缀
+
+# 阿里云OSS配置
+aliyun:
+  oss:
+    enabled: ${ALIYUN_OSS_ENABLED:false}  # 是否启用OSS存储（false使用本地存储）
+    endpoint: ${ALIYUN_OSS_ENDPOINT:oss-cn-beijing.aliyuncs.com}  # OSS Endpoint
+    access-key-id: ${ALIYUN_OSS_ACCESS_KEY_ID:}  # AccessKey ID（从环境变量读取）
+    access-key-secret: ${ALIYUN_OSS_ACCESS_KEY_SECRET:}  # AccessKey Secret（从环境变量读取）
+    bucket-name: ${ALIYUN_OSS_BUCKET_NAME:}  # Bucket名称
+    base-url: ${ALIYUN_OSS_BASE_URL:}  # OSS访问域名
+    signature-expire-seconds: ${ALIYUN_OSS_SIGNATURE_EXPIRE_SECONDS:3600}  # 签名URL过期时间（秒）
+    max-file-size: ${ALIYUN_OSS_MAX_FILE_SIZE:10485760}  # 最大文件大小（字节），默认10MB

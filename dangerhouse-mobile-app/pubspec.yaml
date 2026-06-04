@@ -1,0 +1,61 @@
+name: dangerhouse_app
+description: "A new Flutter project for danger house detection."
+publish_to: "none"
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.2.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # 1. Network: dio
+  dio: ^5.4.0
+
+  # 2. State Management: riverpod
+  flutter_riverpod: ^2.4.9
+  riverpod_annotation: ^2.3.3
+
+  # 3. Persistence: shared_preferences
+  shared_preferences: ^2.2.2
+
+  # 4. JSON Serialization
+  json_annotation: ^4.8.1
+
+  # 5. Internationalization (for dates)
+  intl: ^0.19.0
+  camera: ^0.12.0
+  image_picker: ^1.2.1
+  permission_handler: ^12.0.1
+  path_provider: ^2.1.5
+  path: ^1.9.1
+  flutter_easyloading: ^3.0.5
+
+  # 7. Routing
+  go_router: ^14.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # Code generation
+  build_runner: ^2.4.8
+  json_serializable: ^6.7.1
+  riverpod_generator: ^2.3.9
+
+  # Lint
+  flutter_lints: ^3.0.0
+
+  # Testing
+  mocktail: ^1.0.1
+  integration_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/
+    - assets/images/
