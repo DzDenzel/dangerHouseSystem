@@ -59,6 +59,11 @@ dangerhouse-ai-service/runs_detect/
 # Runtime files
 dangerhouse-backend/uploads/
 
+# Local reference documents
+/后端高并发优化建议.md
+/危房智诊系统技术架构.html
+/dangerhouse-backend/后端接口文档_v3.2.md
+
 # Operating-system files
 .DS_Store
 Thumbs.db
