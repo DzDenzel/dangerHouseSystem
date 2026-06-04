@@ -15,6 +15,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.HexFormat;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 
 @Component
@@ -42,6 +43,7 @@ public class JwtUtil {
         Key key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         return Jwts.builder()
                 .setClaims(claims)
+                .setId(UUID.randomUUID().toString())
                 .setSubject(username != null ? String.valueOf(username) : null)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expirationSeconds * 1000))

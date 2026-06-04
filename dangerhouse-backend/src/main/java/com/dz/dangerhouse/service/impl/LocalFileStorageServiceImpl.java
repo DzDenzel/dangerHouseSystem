@@ -150,10 +150,15 @@ public class LocalFileStorageServiceImpl implements FileStorageService {
     public String uploadFile(MultipartFile file, String directory) {
         validateFile(file);
         try {
+            // 生成文件名
             String fileName = generateFileName(getFileExtension(file.getOriginalFilename()));
+            // 构建相对路径（包含日期）
             String relativePath = buildRelativePath(directory, fileName);
+            // 构建绝对路径
             Path targetPath = buildAbsolutePath(relativePath);
+            // 创建目标目录
             Files.createDirectories(targetPath.getParent());
+            // 保存文件
             file.transferTo(targetPath.toFile());
             log.info("本地文件上传成功: {}", relativePath);
             return relativePath;
