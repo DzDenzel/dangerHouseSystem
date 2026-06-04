@@ -708,7 +708,7 @@ Closes #123
 如有问题或建议，欢迎通过以下方式联系我们：
 
 - 🐛 Issue：[GitHub Issues](https://github.com/DzDenzel/dangerHouseSystem/issues)
-- 📖 关联文档：[管理端 README](../dangerhouse-admin-web/README.md) · [移动端 README](../dangerhouse-mobile-app/Readme.md)
+- 📖 关联文档：[管理端 README](../dangerhouse-admin-web/README.md) · [移动端 README](../dangerhouse-mobile-app/Readme.md) · [AI 服务 README](../dangerhouse-ai-service/Readme.md)
 
 ---
 
