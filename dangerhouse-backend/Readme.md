@@ -62,8 +62,6 @@ mvnw.cmd spring-boot:run
 
 服务监听 `8080`，Swagger UI 在 `http://localhost:8080/swagger-ui.html`。
 
-![Swagger UI](../docs/images/backend-swagger.png)
-
 `/api/health` 接口存在，但不在 SecurityConfig 的放行列表里，不带 Token 访问会返回 401，不能当作免鉴权的存活探针使用。
 
 ## 项目结构

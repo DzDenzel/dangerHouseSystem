@@ -52,10 +52,8 @@ python -m uvicorn api_server:app --host 0.0.0.0 --port 8000
 
 启动后可访问：
 
-- `http://localhost:8000/docs` — Swagger UI。代码里没有禁 `docs_url`，也没自定义文档路由，能打开纯粹是 FastAPI 的默认行为（无鉴权，生产环境自行决定要不要关）。
+- `http://localhost:8000/docs` — Swagger UI，无鉴权。
 - `http://localhost:8000/api/v1/detect_damage` — 唯一的业务接口。
-
-![Swagger UI](../docs/images/ai-service-docs.png)
 
 三个和启动相关的细节：
 
@@ -117,7 +115,7 @@ python -m uvicorn api_server:app --host 0.0.0.0 --port 8000
 
 ### 错误处理
 
-- `503 Model not loaded.`：代码里有（模型容器为 `None` 时抛出），但实际几乎不可达。启动阶段的 `lifespan` 一定会给容器赋值——权重文件不存在时 `load_model_instance` 只打一条 warning，然后用一个没加载自定义权重的模型继续返回。
+- `503 Model not loaded.`：模型容器为 `None` 时抛出，实际不可达。`lifespan` 一定会给容器赋值——权重文件不存在时 `load_model_instance` 只打一条 warning，然后返回一个未加载自定义权重的模型。
 - `422`：没有自定义 handler，完全依赖 FastAPI/Pydantic 的默认校验。`images` 缺失、`score_thr` 越界都会触发。
 - 单张图解码失败（`cv2.imdecode` 返回 `None`）或处理中抛异常，会被路由内的 `try/except` 吞掉，只记一条 error 日志然后跳过这张图。所有图都失败时返回 `imageResults: []`、`detections: []`、`resultImage: null`，`analysis` 是兜底的 `A / 0 / 0 / 0 / "无有效图片"`，HTTP 状态码仍是 200。
 
@@ -132,7 +130,7 @@ python -m uvicorn api_server:app --host 0.0.0.0 --port 8000
 | B | `>= 3` | `>= 5.0%` |
 | A | 以上都不满足 | 以上都不满足 |
 
-阈值常量在 `api_server.py` 顶部（`BUILDING_*_CRACK_THRESHOLD` / `BUILDING_*_RATIO_THRESHOLD`）。注意 D 级用的是严格大于，B/C 级是大于等于。
+阈值常量在 `api_server.py` 顶部（`BUILDING_*_CRACK_THRESHOLD` / `BUILDING_*_RATIO_THRESHOLD`）。D 级为严格大于，B/C 级为大于等于。
 
 `recommendation` 按等级固定映射：
 
@@ -148,7 +146,7 @@ python -m uvicorn api_server:app --host 0.0.0.0 --port 8000
 一次请求传多张图时，每张图各自推理、各自出一份 `Analysis`，然后 `evaluate_building_risk` 做建筑级汇总：
 
 1. 把所有图所有框的中心点 `[(x1+x2)/2, (y1+y2)/2]` 收集起来，跑 `DBSCAN(eps=50, min_samples=1)`。
-2. `min_samples=1` 意味着每个点至少自成一簇，不存在噪声点，`crackCount` 填的是簇的数量。
+2. `min_samples=1`：每个点至少自成一簇，无噪声点，`crackCount` 取簇数。
 3. `damageRatio` 取各图的**最大值**（不是平均值），`confidenceScore` 取各图的平均值。
 4. 用这对 `(簇数, 最大占比)` 再调一次 `classify_risk_level`。
 

@@ -51,24 +51,17 @@ flowchart LR
 | 数据看板 | 建筑列表 | 检测记录 |
 | :---: | :---: | :---: |
 | ![数据看板](docs/images/admin-dashboard.png) | ![建筑列表](docs/images/admin-buildings.png) | ![检测记录](docs/images/admin-detections.png) |
-
-另有高危建筑、用户管理、操作日志页面，截图见 `docs/images/admin-*.png`。
+| ![高危建筑](docs/images/admin-building-risk.png) | ![用户管理](docs/images/admin-users.png) | ![操作日志](docs/images/admin-logs.png) |
 
 ### 移动端 App
 
-普通用户 `user01`：
-
-| 首页 | 建筑档案 | 检测记录 | 个人中心 |
+| 普通用户首页 | 建筑档案 | 检测记录 | 个人中心 |
 | :---: | :---: | :---: | :---: |
-| ![首页](docs/images/app-user-home.png) | ![建筑档案](docs/images/app-user-buildings.png) | ![检测记录](docs/images/app-user-records.png) | ![个人中心](docs/images/app-user-profile.png) |
+| ![普通用户首页](docs/images/app-user-home.png) | ![建筑档案](docs/images/app-user-buildings.png) | ![检测记录](docs/images/app-user-records.png) | ![个人中心](docs/images/app-user-profile.png) |
 
-检测员 `inspector01`：
-
-| 首页 | 建筑档案 | 选择检测建筑 |
+| 检测员首页 | 建筑档案 | 选择检测建筑 |
 | :---: | :---: | :---: |
 | ![检测员首页](docs/images/app-inspector-home.png) | ![建筑档案](docs/images/app-inspector-buildings.png) | ![选择检测建筑](docs/images/app-inspector-detect.png) |
-
-两个角色的建筑与检测数据按账号过滤：同一份数据下普通用户看到 1 栋自有建筑，检测员看到全部 7 栋。
 
 ## 技术栈
 

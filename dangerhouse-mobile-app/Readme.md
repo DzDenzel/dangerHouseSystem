@@ -165,7 +165,7 @@ flutter test integration_test/app_test.dart -d <device_id>
 
 ## 常见问题
 
-**Android 模拟器连不上 localhost 后端。** 代码里没有 `10.0.2.2` 的兼容逻辑，`defaultValue` 就是 `http://localhost:8080`，而模拟器里的 localhost 指向模拟器自身。用 `adb reverse tcp:8080 tcp:8080` 转发，或者 `--dart-define=APP_BASE_URL=http://<局域网IP>:8080`。
+**Android 模拟器连不上 localhost 后端。** 没有 `10.0.2.2` 的兼容逻辑，`defaultValue` 是 `http://localhost:8080`，模拟器里的 localhost 指向自身。用 `adb reverse tcp:8080 tcp:8080` 转发，或者 `--dart-define=APP_BASE_URL=http://<局域网IP>:8080`。
 
 **Web 端请求被浏览器 CORS 拦。** `dio_client.dart` 在 `kIsWeb` 时会给请求加 `Access-Control-Allow-*` 头，但放行与否取决于响应头，后端没开对应来源的话浏览器照样拦下来。
 
