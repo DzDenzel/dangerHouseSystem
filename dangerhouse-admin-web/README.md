@@ -4,6 +4,8 @@
 
 主要依赖：vue `3.4.21` / vite `5.2.8` / typescript `5.4.5` / element-plus `2.7.0` / pinia `2.1.7` / vue-router `4.3.0` / axios `1.13.6` / echarts `5.5.0`。
 
+![登录页](../docs/images/admin-login.png)
+
 ## 功能范围
 
 - 数据看板 `src/views/dashboard`：统计卡片，配合柱状图、饼图、雷达图、漏斗图（图表组件在同目录 `components/` 下，基于 ECharts 封装）

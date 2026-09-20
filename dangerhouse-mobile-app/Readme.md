@@ -2,6 +2,8 @@
 
 危房智能检测系统（dangerHouseSystem）的移动端，Flutter 实现，一套代码跑 Android / iOS / Web / Windows。面向普通用户和检测员：现场拍照、多图上传、调后端 AI 接口检测、看结果，以及建筑档案与检测报告的管理。
 
+![登录页](../docs/images/mobile-web-login.png)
+
 Flutter SDK 约束 `>=3.2.0 <4.0.0`。主要依赖：
 
 | 依赖 | 声明 | 锁定 |

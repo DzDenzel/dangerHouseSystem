@@ -6,6 +6,7 @@
 
 - [系统架构](#系统架构)
 - [模块说明](#模块说明)
+- [运行界面](#运行界面)
 - [技术栈](#技术栈)
 - [环境要求](#环境要求)
 - [快速开始](#快速开始)
@@ -42,6 +43,17 @@ flowchart LR
 | `dangerhouse-ai-service` | FastAPI、PyTorch、Faster R-CNN | `8000` | 建筑损伤图像检测与风险分析 | [Readme](./dangerhouse-ai-service/Readme.md) |
 
 管理端开发端口是 `9090`，由 `vite.config.ts` 硬编码指定；`.env.development` 中的 `VITE_APP_PORT=3000` 不会被读取。
+
+## 运行界面
+
+| 模块 | 界面 |
+| :--- | :--- |
+| 管理端 Web | <img src="docs/images/admin-login.png" width="620" alt="管理端登录页"> |
+| 移动端 Web | <img src="docs/images/mobile-web-login.png" width="300" alt="移动端登录页"> |
+| 业务后端 | Swagger UI `http://localhost:8080/swagger-ui.html`，38 个接口分 9 组<br><img src="docs/images/backend-swagger.png" width="620" alt="后端 Swagger"> |
+| AI 服务 | Swagger UI `http://localhost:8000/docs`<br><img src="docs/images/ai-service-docs.png" width="620" alt="AI 服务 Swagger"> |
+
+移动端截图取自 `flutter build web --release` 产物，非 Android / iOS 真机界面。
 
 ## 技术栈
 

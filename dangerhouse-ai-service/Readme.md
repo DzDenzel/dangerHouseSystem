@@ -55,6 +55,8 @@ python -m uvicorn api_server:app --host 0.0.0.0 --port 8000
 - `http://localhost:8000/docs` — Swagger UI。代码里没有禁 `docs_url`，也没自定义文档路由，能打开纯粹是 FastAPI 的默认行为（无鉴权，生产环境自行决定要不要关）。
 - `http://localhost:8000/api/v1/detect_damage` — 唯一的业务接口。
 
+![Swagger UI](../docs/images/ai-service-docs.png)
+
 三个和启动相关的细节：
 
 - `WEIGHT_PATH = "./runs_detect/best.pt"` 是相对路径，相对于**启动进程时的工作目录**。换目录启动会直接找不到权重。
