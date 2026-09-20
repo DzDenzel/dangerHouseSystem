@@ -35,8 +35,6 @@
 
 `unplugin-auto-import` 与 `unplugin-vue-components` 已接好，`ref`、`ElMessage` 以及 `src/components` 下的组件不写 import 也能用，图标走 `unplugin-icons` 的 `ep` 集合。
 
-依赖里还挂着 `stompjs`、`sockjs-client`、`@wangeditor/editor`、`sortablejs`、`xlsx`，当前 src 下没有实际引用，是跟随模板带过来的。
-
 ## 快速开始
 
 环境要求：Node >= 18.0.0（package.json `engines`），包管理器只能用 pnpm —— `preinstall` 脚本是 `npx only-allow pnpm`，用 npm 或 yarn 装依赖会直接报错退出。后端服务需要先在 `http://localhost:8080` 启动。
@@ -200,6 +198,3 @@ pnpm run build:prod
 - `POST /files`、`DELETE /files` 前端定义了但**后端未实现**，`SingleUpload.vue`、`MultiUpload.vue` 是依赖它们的模板遗留组件；上传应改用业务接口（`/user/avatar`、`/buildings/{id}/image`、`/detections/{id}/images`）
 - `menus` 系列后端没有对应 Controller，当前 `VITE_SYSTEM_LOCAL_MODE=true` 走本地 mock，实际生效的是前端静态路由
 - `POST /auth/logout` 会被 `request.ts` 的「`/auth/` 请求不加 Authorization 头」规则挡住，导致后端拿不到令牌、退出不会拉黑 token
-- `UserController.java` 里 `PUT /users/{userId}/inspector` 的成功文案此前是乱码（编码损坏），已修复
-
-<!-- TODO: 待确认 生产环境是否有既定的部署子路径约定（若需子路径部署，vite.config.ts 需补 base，当前未配置） -->

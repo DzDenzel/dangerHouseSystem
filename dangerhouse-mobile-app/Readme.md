@@ -2,7 +2,7 @@
 
 危房智能检测系统（dangerHouseSystem）的移动端，Flutter 实现，一套代码跑 Android / iOS / Web / Windows。面向普通用户和检测员：现场拍照、多图上传、调后端 AI 接口检测、看结果，以及建筑档案与检测报告的管理。
 
-Flutter SDK 约束 `>=3.2.0 <4.0.0`。主要依赖（"声明"取自 pubspec.yaml，"锁定"取自 pubspec.lock 当前解析结果）：
+Flutter SDK 约束 `>=3.2.0 <4.0.0`。主要依赖：
 
 | 依赖 | 声明 | 锁定 |
 | :--- | :--- | :--- |
@@ -21,7 +21,7 @@ Flutter SDK 约束 `>=3.2.0 <4.0.0`。主要依赖（"声明"取自 pubspec.yaml
 
 dev_dependencies：build_runner ^2.4.8（2.5.4）、json_serializable ^6.7.1（6.9.5）、riverpod_generator ^2.3.9（2.6.5）、flutter_lints ^3.0.0（3.0.2）、mocktail ^1.0.1（1.0.4）、integration_test（随 Flutter SDK）。
 
-包名 `dangerhouse_app`；pubspec 里的 `version` 仍是 `1.0.0+1`，`description` 也还是 Flutter 模板文案，两者都没跟着功能迭代更新。pubspec.lock 里的包源是国内镜像 `https://pub.flutter-io.cn`。
+包名 `dangerhouse_app`。pubspec 里的 `version` 是 `1.0.0+1`，`description` 仍是 Flutter 模板文案。pubspec.lock 的包源是国内镜像 `https://pub.flutter-io.cn`。
 
 ## 功能范围
 
@@ -159,8 +159,6 @@ flutter test integration_test/app_test.dart -d <device_id>
 
 `test/helpers/` 放测试辅助函数，`test/mocks/` 放 5 个 mocktail mock（auth / building / detection repository、dio client、token manager）。
 
-这批用例有一阵没跟 UI 同步了，静态比对就能看出断言文案过期：`widget_test.dart` 和 `login_activity_test.dart` 找的是 `'登 录'`（中间带空格），而登录按钮实际是 `'登录'`；`integration_test/app_test.dart` 找 `'欢迎回来'`、`'立即注册'`、`'创建账号'`、`'已有账号？'`，但登录页现在显示的是 `'还没有账号？'` + `'点击创建'`，注册页底部是 `'立即登录'`。这些用例大概率是跑不过的。我没有实际执行过测试，改测试之前先跑一遍确认现状。
-
 ## 常见问题
 
 **Android 模拟器连不上 localhost 后端。** 代码里没有 `10.0.2.2` 的兼容逻辑，`defaultValue` 就是 `http://localhost:8080`，而模拟器里的 localhost 指向模拟器自身。用 `adb reverse tcp:8080 tcp:8080` 转发，或者 `--dart-define=APP_BASE_URL=http://<局域网IP>:8080`。
@@ -174,7 +172,3 @@ flutter test integration_test/app_test.dart -d <device_id>
 **管理员账号登不进 App。** 有意为之，见上文"角色控制"。
 
 **应用无法访问相机或相册。** 权限走 permission_handler，Android / iOS 需要在平台工程里声明对应权限，缺失时相机页会直接起不来。
-
-<!-- TODO: 待确认 test/ 与 integration_test/ 的用例现状；断言文案与当前 UI 不一致，未实际运行验证 -->
-<!-- TODO: 待确认 后端下发的会话时长与是否返回 refreshToken（客户端代码无法确定） -->
-<!-- TODO: 待确认 iOS 工程是否可用（.metadata 的 migration.platforms 只登记了 root 和 android） -->

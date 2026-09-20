@@ -2,8 +2,6 @@
 
 面向建筑安全监管的危房检测平台。系统覆盖建筑档案管理、现场多图采集、AI 裂缝识别、A/B/C/D 风险评级、检测报告生成与后台运维的完整链路，由管理端、移动端、业务后端与 AI 推理服务四个模块组成。
 
-<!-- TODO: 如需补充界面截图，放在 docs/images/ 下并在此处引用 -->
-
 ## 目录
 
 - [系统架构](#系统架构)
@@ -158,7 +156,5 @@ dangerHouseSystem/
 | [dangerhouse-ai-service/Readme.md](./dangerhouse-ai-service/Readme.md) | 推理接口、风险评级规则、模型权重准备 |
 
 ## 许可证
-
-<!-- TODO: 仓库根目录尚未添加 LICENSE 文件，确认后补充 -->
 
 `dangerhouse-admin-web` 的 LICENSE 继承自 vue3-element-admin 模板（MIT），第三方许可证存放于该模块的 `licenses/` 目录。

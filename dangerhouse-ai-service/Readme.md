@@ -233,8 +233,3 @@ Multipart 字段名必须是 `images`。CORS 配的是 `allow_origins=["*"]` 加
 - `DEVICE` 只在进程启动时判定一次。
 - 单张图出错会被静默跳过，只在日志里留一条 error。接到 200 不代表每张图都处理成功，客户端得自己核对 `imageResults` 条数和上传数量是否一致。
 - `damage_detector_qt.py` 与 `api_server.py` 的推理代码是两份拷贝，行为已经有差异（权重缺失时的处理），改动容易漏。
-
-<!-- TODO: 待确认 支持的最低 Python 版本（requirements.txt 未做任何版本约束，代码用了 Annotated 语法） -->
-<!-- TODO: 待确认 生产部署是否上 Gunicorn + Uvicorn Worker 或多副本，代码里只有单进程 uvicorn.run -->
-<!-- TODO: 待确认 后端调用该接口的超时与重试配置 -->
-<!-- TODO: 待确认 best.pt 是由哪个版本的训练代码产出的（当前脚本不训练，权重来源无法从仓库确认） -->
