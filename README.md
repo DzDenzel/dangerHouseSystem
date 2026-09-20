@@ -46,14 +46,29 @@ flowchart LR
 
 ## 运行界面
 
-| 模块 | 界面 |
-| :--- | :--- |
-| 管理端 Web | <img src="docs/images/admin-login.png" width="620" alt="管理端登录页"> |
-| 移动端 Web | <img src="docs/images/mobile-web-login.png" width="300" alt="移动端登录页"> |
-| 业务后端 | Swagger UI `http://localhost:8080/swagger-ui.html`，38 个接口分 9 组<br><img src="docs/images/backend-swagger.png" width="620" alt="后端 Swagger"> |
-| AI 服务 | Swagger UI `http://localhost:8000/docs`<br><img src="docs/images/ai-service-docs.png" width="620" alt="AI 服务 Swagger"> |
+### 管理端 Web
 
-移动端截图取自 `flutter build web --release` 产物，非 Android / iOS 真机界面。
+| 数据看板 | 建筑列表 | 检测记录 |
+| :---: | :---: | :---: |
+| ![数据看板](docs/images/admin-dashboard.png) | ![建筑列表](docs/images/admin-buildings.png) | ![检测记录](docs/images/admin-detections.png) |
+
+另有高危建筑、用户管理、操作日志页面，截图见 `docs/images/admin-*.png`。
+
+### 移动端 App
+
+普通用户 `user01`：
+
+| 首页 | 建筑档案 | 检测记录 | 个人中心 |
+| :---: | :---: | :---: | :---: |
+| ![首页](docs/images/app-user-home.png) | ![建筑档案](docs/images/app-user-buildings.png) | ![检测记录](docs/images/app-user-records.png) | ![个人中心](docs/images/app-user-profile.png) |
+
+检测员 `inspector01`：
+
+| 首页 | 建筑档案 | 选择检测建筑 |
+| :---: | :---: | :---: |
+| ![检测员首页](docs/images/app-inspector-home.png) | ![建筑档案](docs/images/app-inspector-buildings.png) | ![选择检测建筑](docs/images/app-inspector-detect.png) |
+
+两个角色的建筑与检测数据按账号过滤：同一份数据下普通用户看到 1 栋自有建筑，检测员看到全部 7 栋。
 
 ## 技术栈
 
