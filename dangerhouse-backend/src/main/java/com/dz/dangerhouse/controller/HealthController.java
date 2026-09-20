@@ -16,11 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "系统监控", description = "系统健康检查接口")
 public class HealthController {
 
-    /**
-     * 返回简单的服务健康状态快照
-     */
     @GetMapping("/health")
-    @Operation(summary = "健康检查", description = "检查API、数据库和AI服务状态")
+    @Operation(summary = "健康检查", description = "返回服务存活状态快照（当前不探测数据库与AI服务）")
     public Result<HealthCheckResponse> healthCheck() {
         HealthCheckResponse response = new HealthCheckResponse();
         response.setStatus("UP");

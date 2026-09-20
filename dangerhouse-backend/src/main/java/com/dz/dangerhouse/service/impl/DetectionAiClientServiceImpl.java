@@ -26,7 +26,6 @@ import java.util.Map;
 
 /**
  * AI检测客户端服务实现类
- * 负责调用AI检测服务、处理检测结果、保存图片结果等
  */
 @Slf4j
 @Service
@@ -42,11 +41,7 @@ public class DetectionAiClientServiceImpl implements DetectionAiClientService {
     private ImageMapper imageMapper;
 
     /**
-     * 调用AI检测服务进行图片分析
-     *
-     * @param imageFiles 图片文件列表
-     * @return AI检测数据信息
-     * @throws BusinessException 如果AI检测失败
+     * @throws BusinessException AI服务返回空结果或响应码非200时抛出
      */
     @Override
     public AiDetectionResponse.DataInfo detect(List<File> imageFiles) {
@@ -58,12 +53,6 @@ public class DetectionAiClientServiceImpl implements DetectionAiClientService {
         return response.getData();
     }
 
-    /**
-     * 将AI分析结果应用到检测记录实体
-     *
-     * @param detection 检测记录
-     * @param dataInfo  AI检测数据
-     */
     @Override
     public void applyAnalysisToDetection(Detection detection, AiDetectionResponse.DataInfo dataInfo) {
         AiDetectionResponse.Analysis overallAnalysis = dataInfo.getAnalysis();
@@ -82,12 +71,6 @@ public class DetectionAiClientServiceImpl implements DetectionAiClientService {
         detection.setDetectResult(buildSimplifiedDetectResult(dataInfo));
     }
 
-    /**
-     * 持久化图片级别的检测结果（保存结果图路径）
-     *
-     * @param images  原始图片列表
-     * @param results AI检测结果列表
-     */
     @Override
     public void persistImageResults(List<Image> images, List<AiDetectionResponse.ImageResult> results) {
         if (images == null || results == null) {
@@ -111,11 +94,7 @@ public class DetectionAiClientServiceImpl implements DetectionAiClientService {
     }
 
     /**
-     * 解析检测结果JSON字符串为DataInfo对象列表
-     * 支持数组格式和单个对象格式
-     *
-     * @param detectResult 检测结果JSON字符串
-     * @return DataInfo对象列表
+     * 支持数组与单个对象两种格式，无法解析时返回空列表
      */
     @Override
     public List<AiDetectionResponse.DataInfo> parseDetectResult(String detectResult) {
@@ -125,7 +104,6 @@ public class DetectionAiClientServiceImpl implements DetectionAiClientService {
 
         try {
             String content = detectResult.trim();
-            // 处理数组格式
             if (content.startsWith("[")) {
                 JSONArray array = JSONUtil.parseArray(content);
                 List<AiDetectionResponse.DataInfo> results = new ArrayList<>();
@@ -137,7 +115,6 @@ public class DetectionAiClientServiceImpl implements DetectionAiClientService {
                 return results;
             }
 
-            // 处理单个对象格式
             if (content.startsWith("{")) {
                 return List.of(toDataInfo(JSONUtil.parseObj(content)));
             }
@@ -151,10 +128,7 @@ public class DetectionAiClientServiceImpl implements DetectionAiClientService {
     }
 
     /**
-     * 解析检测结果JSON字符串为Map对象
-     *
-     * @param detectResult 检测结果JSON字符串
-     * @return Map对象，解析失败返回null
+     * @return 解析失败时返回 null
      */
     @Override
     public Map<String, Object> parseDetectResultToMap(String detectResult) {
@@ -172,8 +146,7 @@ public class DetectionAiClientServiceImpl implements DetectionAiClientService {
     }
 
     /**
-     * 构建简化的检测结果JSON字符串
-     * 包含裂缝列表、统计信息和评估建议
+     * 输出包含裂缝列表、统计信息和评估建议
      */
     private String buildSimplifiedDetectResult(AiDetectionResponse.DataInfo dataInfo) {
         if (dataInfo == null) {
@@ -222,8 +195,7 @@ public class DetectionAiClientServiceImpl implements DetectionAiClientService {
     }
 
     /**
-     * 将JSONObject转换为DataInfo对象
-     * 兼容不同的JSON结构
+     * 兼容 analysis 节点嵌套与字段平铺两种JSON结构
      */
     private AiDetectionResponse.DataInfo toDataInfo(JSONObject source) {
         if (source == null) {
@@ -262,9 +234,6 @@ public class DetectionAiClientServiceImpl implements DetectionAiClientService {
                 .build();
     }
 
-    /**
-     * 将JSONArray转换为DetectionItem列表
-     */
     private List<AiDetectionResponse.DetectionItem> toDetectionItems(JSONArray array) {
         List<AiDetectionResponse.DetectionItem> items = new ArrayList<>();
         if (array == null) {
@@ -292,9 +261,6 @@ public class DetectionAiClientServiceImpl implements DetectionAiClientService {
         return items;
     }
 
-    /**
-     * 将JSONArray转换为Integer列表
-     */
     private List<Integer> toIntegerList(JSONArray array) {
         if (array == null) {
             return null;
@@ -310,9 +276,6 @@ public class DetectionAiClientServiceImpl implements DetectionAiClientService {
         return values;
     }
 
-    /**
-     * 安全地将Object转换为Integer
-     */
     private Integer getInteger(Object value) {
         if (value instanceof Number number) {
             return number.intValue();
@@ -327,9 +290,6 @@ public class DetectionAiClientServiceImpl implements DetectionAiClientService {
         return null;
     }
 
-    /**
-     * 安全地将Object转换为Double
-     */
     private Double getDouble(Object value) {
         if (value instanceof Number number) {
             return number.doubleValue();

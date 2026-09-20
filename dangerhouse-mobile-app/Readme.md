@@ -1,219 +1,76 @@
-<div align="center">
+# dangerhouse-mobile-app
 
-# 🏠 危房智能检测系统
+危房智能检测系统（dangerHouseSystem）的移动端，Flutter 实现，一套代码跑 Android / iOS / Web / Windows。面向普通用户和检测员：现场拍照、多图上传、调后端 AI 接口检测、看结果，以及建筑档案与检测报告的管理。
 
-**Dangerous House Intelligent Detection System — 移动端 App**
+Flutter SDK 约束 `>=3.2.0 <4.0.0`。主要依赖（"声明"取自 pubspec.yaml，"锁定"取自 pubspec.lock 当前解析结果）：
 
-[![Flutter](https://img.shields.io/badge/Flutter-3.2+-02569B?style=flat-square&logo=flutter)](https://flutter.dev)
-[![Dart](https://img.shields.io/badge/Dart-3.2+-0175C2?style=flat-square&logo=dart)](https://dart.dev)
-[![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20Web%20%7C%20Windows-blue?style=flat-square)](https://flutter.dev)
-[![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](../dangerhouse-admin-web/LICENSE)
-[![Version](https://img.shields.io/badge/Version-v3.3-orange?style=flat-square)](#-版本历史)
-
-**现场采集、多图检测、结果查看与报告管理的跨平台移动应用**
-
-[项目简介](#-项目简介) • [核心功能](#-核心功能) • [技术架构](#-技术架构) • [快速开始](#-快速开始) • [版本历史](#-版本历史)
-
-</div>
-
----
-
-> **当前版本**：v3.3  
-> **文档更新**：2026-06-04
-
-## 📋 目录
-
-- [项目简介](#-项目简介)
-- [核心功能](#-核心功能)
-- [技术架构](#-技术架构)
-- [技术栈](#-技术栈)
-- [快速开始](#-快速开始)
-- [项目结构](#-项目结构)
-- [配置说明](#-配置说明)
-- [构建发布](#-构建发布)
-- [测试体系](#-测试体系)
-- [开发指南](#-开发指南)
-- [常见问题](#-常见问题)
-- [贡献指南](#-贡献指南)
-- [版本历史](#-版本历史)
-- [许可证](#-许可证)
-
----
-
-## 📖 项目简介
-
-`dangerhouse-mobile-app`（DangerHouse App）是危房智能检测系统的 **移动端应用**，基于 **Flutter** 开发，一套代码支持 **Android / Web / Windows**。面向普通用户与检测员，承担现场拍照、多图上传、AI 检测结果查看、建筑档案与检测报告管理等能力。
-
-### 系统定位
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    危房智能检测系统整体架构                        │
-├─────────────────────────────────────────────────────────────────┤
-│  ┌─────────────┐    ┌─────────────────┐    ┌─────────────────┐  │
-│  │ 移动端 APP  │    │  后端服务       │    │  AI 检测服务    │  │
-│  │ (本项目)    │ ←→ │  Spring Boot    │ ←→ │  FastAPI        │  │
-│  └─────────────┘    └─────────────────┘    └─────────────────┘  │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-### 核心价值
-
-| 维度 | 传统方式 | 本应用 |
+| 依赖 | 声明 | 锁定 |
 | :--- | :--- | :--- |
-| **检测效率** | 人工现场勘查数小时 | 拍照上传，分钟级获取 AI 结果 |
-| **结果客观性** | 依赖人员经验 | 算法量化评估，标准统一 |
-| **数据管理** | 纸质记录难追溯 | 数字化存储，历史可查 |
-| **角色体验** | 单一界面 | 普通用户简化首页，检测员完整业务首页 |
+| dio | ^5.4.0 | 5.9.2 |
+| flutter_riverpod | ^2.4.9 | 2.6.1 |
+| riverpod_annotation | ^2.3.3 | 2.6.1 |
+| go_router | ^14.0.0 | 14.8.1 |
+| shared_preferences | ^2.2.2 | 2.5.4 |
+| json_annotation | ^4.8.1 | 4.9.0 |
+| intl | ^0.19.0 | 0.19.0 |
+| camera | ^0.12.0 | 0.12.0 |
+| image_picker | ^1.2.1 | 1.2.1 |
+| permission_handler | ^12.0.1 | 12.0.1 |
+| path_provider | ^2.1.5 | 2.1.5 |
+| flutter_easyloading | ^3.0.5 | 3.0.5 |
 
----
+dev_dependencies：build_runner ^2.4.8（2.5.4）、json_serializable ^6.7.1（6.9.5）、riverpod_generator ^2.3.9（2.6.5）、flutter_lints ^3.0.0（3.0.2）、mocktail ^1.0.1（1.0.4）、integration_test（随 Flutter SDK）。
 
-## ✨ 核心功能
+包名 `dangerhouse_app`；pubspec 里的 `version` 仍是 `1.0.0+1`，`description` 也还是 Flutter 模板文案，两者都没跟着功能迭代更新。pubspec.lock 里的包源是国内镜像 `https://pub.flutter-io.cn`。
 
-### 业务流程
+## 功能范围
 
-```
-用户登录 → 创建/选择建筑 → 拍摄或选图 → 上传检测 → 查看结果 → 生成报告
-```
+**登录与注册。** 登录页只有一个账号输入框加一个密码框，账号框的占位提示是"用户名 / 手机号 / 邮箱"，具体按哪种方式解析由后端决定；没有独立的手机号登录、邮箱登录入口。页面上有"记住我"和"忘记密码？"，后者只弹一句"请联系系统管理员找回密码"，没有对应页面。勾选记住我后账号会写进本地 `remembered_account`，下次进页面自动回填，同时登录请求带 `rememberMe` 给后端。注册页收集用户名、手机号、密码、确认密码，提交前用 `/api/auth/check-username/{username}` 和 `/api/auth/check-phone/{phone}` 做查重。
 
-### 功能模块
+**双首页。** `PermissionUtil.isInspector` 判定为检测员时进检测员首页（今日检测统计、A/B/C/D 风险分布、最近检测记录、通知角标），否则进普通用户首页。角色来自登录响应里的 `roles` 列表，取值 `ADMIN` / `INSPECTOR` / `USER`。
 
-| 模块 | 主要能力 |
-| :--- | :--- |
-| **用户认证** | 用户名/手机/邮箱登录、注册、JWT、`clientType=APP`、记住我、修改密码 |
-| **首页仪表盘** | 统计指标、风险分布、快捷入口、通知角标（检测员） |
-| **建筑档案** | 列表、搜索、筛选、CRUD、图片、归档与监测 |
-| **拍摄检测** | 自定义相机、相册多图、关联建筑、检测备注（必填） |
-| **结果展示** | 裂缝标注、A/B/C/D 评级、多图对比、手动刷新状态 |
-| **检测报告** | 列表、详情、生成、已有报告直接查看/下载 |
-| **个人中心** | 资料编辑、账户与安全、检测档案、帮助与通知 |
-| **历史归档** | 检测历史、状态/风险筛选、危险建筑清单 |
+**建筑档案。** 列表、搜索、详情、新建、编辑、删除，图片上传与展示，归档和已归档危险建筑清单。
 
----
+**拍摄与检测。** 自定义相机页（camera 插件）和相册选图（image_picker），关联建筑、填检测备注，上传后调 `/api/ai/detect`。结果页在图上标注裂缝，展示 A/B/C/D 评级，支持多图切换，状态手动刷新。
 
-## 🏗️ 技术架构
+**检测报告。** 报告列表与详情，调 `/api/reports/generate` 生成报告，已有报告直接查看。
 
-项目采用 **Clean Architecture** + **MVVM**，结合 **Riverpod** 状态管理：
+**个人中心。** 资料编辑、账户与安全（改密码走 `PUT /api/user/password`）、我的检测档案、通知、帮助、分析设置。
 
-```
-Presentation (UI / Pages)
-        ↓
-Domain (Entities / UseCases / Services)
-        ↓
-Data (Repositories / Remote DataSources / DTOs)
-        ↓
-Core (Network / Auth / Router / Theme / Utils)
-```
+**离线草稿。** 检测草稿以 JSON 存进 SharedPreferences，可手动同步。
 
----
+## 技术栈
 
-## 🛠️ 技术栈
+Flutter + Dart，Riverpod 管状态，go_router 管路由与守卫，dio 做网络层并统一处理 Token 注入和错误，json_serializable + build_runner 生成序列化代码，shared_preferences 存 Token 与轻量配置，camera / image_picker / permission_handler 负责采集与权限，flutter_easyloading 统一 loading 与提示，intl 处理日期格式。Riverpod 的作用域没有外包给框架，`lib/main.dart` 里建了一个全局 `ProviderContainer`（`appContainer`），用 `UncontrolledProviderScope` 注入，路由守卫和拦截器要读 Provider 时直接拿它。
 
-| 类别 | 技术 | 版本 | 说明 |
-| :--- | :--- | :--- | :--- |
-| **框架** | Flutter | 3.2+ | 跨平台 UI |
-| **语言** | Dart | 3.2+ | 空安全 |
-| **状态管理** | Riverpod | 2.4+ | 响应式状态 |
-| **路由** | go_router | 14+ | 声明式路由与守卫 |
-| **网络** | Dio | 5.4+ | 拦截器、Multipart |
-| **本地存储** | SharedPreferences | 2.2+ | Token 与配置 |
-| **序列化** | json_serializable | 6.7+ | 代码生成 |
-| **相机/相册** | camera / image_picker | - | 拍摄与选图 |
-| **UI** | Material 3 | - | 设计规范 |
+## 快速开始
 
----
-
-## 🚀 快速开始
-
-### 环境要求
-
-| 依赖 | 版本要求 |
-| :--- | :--- |
-| **Flutter SDK** | >= 3.2.0 |
-| **Dart SDK** | >= 3.2.0 |
-| **后端服务** | `http://localhost:8080`（或局域网 IP） |
-| **AI 服务** | 执行检测时需要 `http://localhost:8000` |
+环境要求：Flutter SDK >= 3.2.0，一个可用的后端（默认地址 `http://localhost:8080`）。AI 检测由后端转发，客户端不直连 AI 服务。
 
 ```bash
-flutter doctor -v
-```
-
-### 安装步骤
-
-```bash
-# 1. 克隆项目
-git clone https://github.com/DzDenzel/dangerHouseSystem.git
-cd dangerHouseSystem/dangerhouse-mobile-app
-
-# 2. 安装依赖
 flutter pub get
 
-# 3. 生成 JSON 代码（模型变更后执行）
+# 模型有改动时重新生成 *.g.dart，首次 clone 后也建议跑一次
 dart run build_runner build --delete-conflicting-outputs
 
-# 4. 运行
 flutter run -d chrome      # Web
 flutter run -d windows     # Windows
-flutter run -d <device_id> # Android
+flutter run -d <device_id> # Android / iOS
 ```
 
-**Android 模拟器访问本机后端：**
+后端地址通过编译期常量注入，不用改代码：
+
+```bash
+flutter run -d chrome --dart-define=APP_BASE_URL=http://192.168.1.100:8080
+```
+
+Android 模拟器或真机要访问宿主机上的后端，用端口转发让 localhost 直接可达：
 
 ```bash
 adb reverse tcp:8080 tcp:8080
 ```
 
----
-
-## 📁 项目结构
-
-```
-dangerhouse-mobile-app/
-├── lib/
-│   ├── core/           # 网络、认证、路由、主题、工具、公共组件
-│   ├── data/           # DTO、Repository、Remote DataSource
-│   ├── domain/         # Entity、UseCase、Service
-│   ├── presentation/   # 页面（home、capture、login、profile、result、task）
-│   ├── providers/      # 全局 Riverpod Provider
-│   ├── app.dart
-│   └── main.dart
-├── assets/images/      # Logo、背景等资源
-├── test/               # 单元测试与 Widget 测试
-├── integration_test/   # 集成测试
-├── android/            # Android 工程配置
-└── pubspec.yaml
-```
-
----
-
-## ⚙️ 配置说明
-
-API 地址位于 `lib/core/constants/api_constants.dart`：
-
-```dart
-class ApiConstants {
-  static String get baseUrl {
-    if (kIsWeb) return 'http://localhost:8080';
-    if (defaultTargetPlatform == TargetPlatform.android) {
-      return 'http://10.0.2.2:8080';  // 模拟器
-    }
-    return 'http://localhost:8080';
-  }
-}
-```
-
-真机调试请改为局域网 IP，例如 `http://192.168.1.100:8080`。
-
-| 配置项 | 默认值 | 说明 |
-| :--- | :--- | :--- |
-| `connectTimeout` | 15000 ms | 连接超时 |
-| `receiveTimeout` | 15000 ms | 接收超时 |
-
-登录需携带 `clientType: "APP"`；会话时长与后端一致（普通 1 小时，记住我 3 天）。
-
----
-
-## 📦 构建发布
+打包：
 
 ```bash
 flutter build apk --release
@@ -222,176 +79,102 @@ flutter build web --release
 flutter build windows --release
 ```
 
-产物路径：`build/app/outputs/flutter-apk/`、`build/web/`、`build/windows/runner/Release/`。
+`ios/` 工程目录在仓库里，但构建需要 macOS 与 Xcode。
 
----
+## 目录结构
 
-## 🧪 测试体系
+```
+lib/
+├── main.dart              # navigatorKey、全局 appContainer、runApp
+├── app.dart               # DangerHouseApp：MaterialApp.router + EasyLoading
+├── core/
+│   ├── auth/              # token_manager.dart
+│   ├── constants/         # api_constants、app_colors、app_info
+│   ├── errors/            # error_handler、errors、exceptions
+│   ├── network/           # dio_client、auth_interceptor
+│   ├── router/            # app_router（含 redirect 守卫）、app_routes
+│   ├── state/             # base_state
+│   └── theme/ utils/
+├── data/
+│   ├── models/            # auth / building / dashboard / detection / report
+│   ├── repositories/      # auth、building、detection、report、offline_detection、task 等 9 个
+│   └── sources/           # *_remote_data_source
+├── domain/
+│   └── entities/          # detection_report、task —— 只有实体，没有 usecase / service
+├── providers/             # auth、dashboard、detection、offline_detection、notification 等 10 个
+└── presentation/
+    ├── login/             # login_activity、register_activity
+    ├── home/              # home_activity、home_content、user_home_content、building_*
+    ├── capture/           # capture_activity、ai_detection_page、building_create/edit/selection、camera_grid_painter
+    ├── result/            # result_activity
+    ├── task/              # report_page、report_detail_page
+    └── profile/           # profile_activity、user_profile_activity 及各类设置页
+```
+
+`assets/images/` 下目前只有 `logo.png` 和 `app_logo_circular.png`，pubspec.yaml 里按目录整体声明。
+
+## 关键设计
+
+**API 基址**在 `lib/core/constants/api_constants.dart`，是编译期常量，没有按平台分支：
+
+```dart
+static const String currentBaseUrl = String.fromEnvironment(
+  'APP_BASE_URL',
+  defaultValue: 'http://localhost:8080',
+);
+
+static String get baseUrl => currentBaseUrl;
+```
+
+所以 Android 上不存在自动切换成 `10.0.2.2` 的逻辑，模拟器里要么 `adb reverse`，要么用 `--dart-define` 显式传局域网地址。
+
+**超时**：`connectTimeout` 和 `receiveTimeout` 都是 15000 ms，在 `lib/core/network/dio_client.dart` 的 `_createBaseOptions()` 里从 `ApiConstants` 读。拦截器顺序是日志拦截器 → `AuthInterceptor` →（仅 Web 平台）CORS 头拦截器。
+
+**Token 存储**：`lib/core/auth/token_manager.dart` 用 SharedPreferences，四个 key 分别是 `auth_token`、`refresh_token`、`token_expiry`、`user_id`。登录成功时只写了 `auth_token` 和 `user_id`——`saveToken` 的 `refreshToken` / `expiryTime` 是可选参数，登录调用没有传，所以这两个 key 实际是空的。过期判断落在 `_getJwtExpiry()` 上：把 JWT 第二段做 base64Url 解码后取 `exp`。会话时长由后端决定，客户端没有 1 小时 / 3 天这类常量。
+
+**路由守卫**：`lib/core/router/app_router.dart` 里 routerProvider 的 `redirect`。未登录且目标不是 `/login`、`/register` 时跳登录页；已登录还去访问登录页或注册页时跳 `/home`。
+
+**401 处理**：`lib/core/network/auth_interceptor.dart`。`onRequest` 先查 Token 是否过期，过期就直接 reject 一个 401 并跳登录页；`onError` 遇到 401 时调 `authNotifier.handleSessionExpired()` 再 `context.go('/login')`。`/api/auth/login`、`/api/auth/register`、两个查重接口、`/api/health` 在公开路径白名单里，主动退出登录有 3 秒抑制窗口，避免退出瞬间的并发请求弹出"登录已过期"。
+
+**clientType**：登录请求固定带 `clientType: 'APP'`（`lib/data/sources/auth_remote_data_source.dart`），`LoginRequest` 模型的字段默认值同样是 `'APP'`。
+
+**角色控制**：`lib/core/utils/permission_util.dart` 定义 `ADMIN` / `INSPECTOR` / `USER`。`canLoginApp` 只放行普通用户和检测员，管理员登录会被拦下并提示"当前账号不允许登录 App，请联系管理员"（`lib/providers/auth_provider.dart`）；用本地缓存恢复登录态时也会重新校验角色，管理员的缓存不会被当成已登录。
+
+## 测试
 
 ```bash
 flutter test
 flutter test test/unit/repositories/auth_repository_test.dart
-flutter test --coverage
-flutter test integration_test/app_test.dart
+flutter test integration_test/app_test.dart -d <device_id>
 ```
 
-| 模块 | 类型 | 覆盖内容 |
+| 文件 | 类型 | 内容 |
 | :--- | :--- | :--- |
-| AuthRepository | 单元测试 | 登录、注册、Token |
-| BuildingRepository | 单元测试 | 建筑 CRUD |
-| AuthProvider | 单元测试 | 认证状态 |
-| LoginActivity | Widget 测试 | 登录交互 |
-| App Flow | 集成测试 | 主流程 |
+| test/widget_test.dart | Widget | 登录页冒烟 |
+| test/widgets/login_activity_test.dart | Widget | 登录交互：空值校验、密码错误、协议勾选、跳注册 |
+| test/unit/repositories/auth_repository_test.dart | 单元 | 登录、注册、Token 读写 |
+| test/unit/repositories/building_repository_test.dart | 单元 | 建筑 CRUD |
+| test/unit/providers/auth_provider_test.dart | 单元 | 认证状态流转 |
+| integration_test/app_test.dart | 集成 | 3 个用例：登录全流程、登录→注册跳转、注册表单校验 |
 
----
+`test/helpers/` 放测试辅助函数，`test/mocks/` 放 5 个 mocktail mock（auth / building / detection repository、dio client、token manager）。
 
-## 📝 开发指南
+这批用例有一阵没跟 UI 同步了，静态比对就能看出断言文案过期：`widget_test.dart` 和 `login_activity_test.dart` 找的是 `'登 录'`（中间带空格），而登录按钮实际是 `'登录'`；`integration_test/app_test.dart` 找 `'欢迎回来'`、`'立即注册'`、`'创建账号'`、`'已有账号？'`，但登录页现在显示的是 `'还没有账号？'` + `'点击创建'`，注册页底部是 `'立即登录'`。这些用例大概率是跑不过的。我没有实际执行过测试，改测试之前先跑一遍确认现状。
 
-### 提交规范
+## 常见问题
 
-```bash
-feat(detection): 检测备注改为必填
-fix(auth): 修复主动退出后误报过期
-```
+**Android 模拟器连不上 localhost 后端。** 代码里没有 `10.0.2.2` 的兼容逻辑，`defaultValue` 就是 `http://localhost:8080`，而模拟器里的 localhost 指向模拟器自身。用 `adb reverse tcp:8080 tcp:8080` 转发，或者 `--dart-define=APP_BASE_URL=http://<局域网IP>:8080`。
 
-### 代码规范
+**Web 端请求被浏览器 CORS 拦。** `dio_client.dart` 在 `kIsWeb` 时会给请求加 `Access-Control-Allow-*` 头，但放行与否取决于响应头，后端没开对应来源的话浏览器照样拦下来。
 
-- 遵循 [Effective Dart](https://dart.dev/guides/language/effective-dart)
-- 公共 API 添加文档注释；优先使用 `const` 构造函数
-- 路由统一通过 `AppRouter`，避免硬编码路径
+**改了模型却报序列化错误。** `lib/data/models/` 和 `lib/domain/entities/` 下的 `*.g.dart` 是生成的，改完模型要重跑 `dart run build_runner build --delete-conflicting-outputs`。
 
----
+**登录成功但会话不会自动续期。** `refresh_token` 没有落盘，拦截器里也没有刷新 Token 的逻辑，Token 一过期就是直接回登录页。
 
-## ❓ 常见问题
+**管理员账号登不进 App。** 有意为之，见上文"角色控制"。
 
-### Q: 登录后 Token 丢失？
+**应用无法访问相机或相册。** 权限走 permission_handler，Android / iOS 需要在平台工程里声明对应权限，缺失时相机页会直接起不来。
 
-**A:** 检查 `TokenManager` 与 `SharedPreferences` 初始化是否正常。
-
-### Q: 网络请求超时？
-
-**A:** 确认后端已启动；Android 模拟器用 `10.0.2.2`；真机用局域网 IP。
-
-### Q: 图片上传失败？
-
-**A:** 检查文件大小与 `multipart/form-data`；后端单文件默认上限 10 MB。
-
-### Q: 检测结果解析错误？
-
-**A:** `detectResult` 可能为 JSON 对象或字符串，代码已做兼容处理。
-
-### Q: AI 检测一直失败？
-
-**A:** 确认 AI 服务与后端 `ai.detection.url` 配置正确；任务状态为 `FAILED` 时可重试。
-
----
-
-## 🤝 贡献指南
-
-1. Fork 本仓库
-2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改并发起 Pull Request
-
----
-
-## 📅 版本历史
-
-### v3.3 (2026-04-15)
-
-**本次 3.3 技术增量更新：**
-
-- ✅ 统一移动端登录页品牌 Logo，与 Web 视觉识别一致
-- ✅ 账户安全能力与后端 `PUT /api/user/password` 保持一致
-
-### v3.2.1 (2026-04-14)
-
-**本次 3.2.1 技术增量更新：**
-
-- ✅ 检测员与普通用户分别提供「账户与安全」入口
-- ✅ 统一账户安全页与修改密码表单校验
-- ✅ 接入 `PUT /api/user/password`
-
-### v3.2 (2026-04-13)
-
-**本次 3.2 技术增量更新：**
-
-- ✅ 登录请求新增 `clientType = APP`
-- ✅ 记住我、会话时长（1h / 3d）、退出拉黑 Token
-- ✅ 管理员不能凭本地缓存进入 App
-- ✅ 注册页二次密码与查重校验
-- ✅ 双首页：普通用户简化首页 / 检测员完整首页
-- ✅ 建筑与报告页补齐归属字段展示
-
-### v3.1 (2026-03-23)
-
-**本次 3.1 技术增量更新：**
-
-- ✅ 检测详情与报告页补齐 `READY / FAILED / CREATED` 主操作
-- ✅ 开始检测防重复点击；结果页改手动刷新
-- ✅ 检测备注业务必填；列表显示「建筑名 + 备注」
-- ✅ AI 不可用业务化提示；关键动作后刷新事件广播
-
-### v3.0 (2026-03)
-
-**本次 3.0 技术增量更新：**
-
-- ✅ 检测任务状态流与多图上传、多图结果展示
-- ✅ 报告多图回显与生成闭环；通知基于真实数据聚合
-- ✅ 离线检测草稿缓存与手动同步
-
-### v2.5 (2025-03)
-
-- ✅ 建筑图片上传与列表/详情展示
-- ✅ 检测详情「去检测」与图片路径工具类
-- ✅ Logo、报告详情与检测历史展示优化
-
-### v2.4 (2025-03)
-
-- ✅ 无结果页与上传-检测-刷新流程
-- ✅ 月度统计前端计算；已归档建筑风险筛选修正
-
-### v2.3 (2025-03)
-
-- ✅ 综合风险等级算法与权限工具类
-- ✅ 快速检测与检测备注
-
-### v2.2 (2025-03)
-
-- ✅ Clean Architecture 重构、go_router、Riverpod 状态基类
-- ✅ 统一错误处理与测试体系建立
-
-### v1.0 (2025-01)
-
-- 用户认证、首页、建筑、拍摄检测、结果、报告、个人中心初版
-
-### 规划中
-
-- [ ] 离线缓存（sqflite）
-- [ ] 推送通知（FCM 等）
-- [ ] 多语言（i18n）
-- [ ] 图片 CDN 与统一缓存分层
-
----
-
-## 📄 许可证
-
-本项目基于 [MIT License](../dangerhouse-admin-web/LICENSE) 开源协议发布。
-
----
-
-## 📞 联系方式
-
-- 🐛 Issue：[GitHub Issues](https://github.com/DzDenzel/dangerHouseSystem/issues)
-- 📖 关联文档：[后端 README](../dangerhouse-backend/Readme.md) · [管理端 README](../dangerhouse-admin-web/README.md) · [AI 服务 README](../dangerhouse-ai-service/Readme.md)
-
----
-
-<div align="center">
-
-**⭐ 如果这个项目对你有帮助，请给一个 Star 支持一下！⭐**
-
-Made with ❤️ by Danger House Team
-
-**让危房检测更智能、更高效**
-
-</div>
+<!-- TODO: 待确认 test/ 与 integration_test/ 的用例现状；断言文案与当前 UI 不一致，未实际运行验证 -->
+<!-- TODO: 待确认 后端下发的会话时长与是否返回 refreshToken（客户端代码无法确定） -->
+<!-- TODO: 待确认 iOS 工程是否可用（.metadata 的 migration.platforms 只登记了 root 和 android） -->

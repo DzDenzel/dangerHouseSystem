@@ -1,13 +1,4 @@
 /// 应用路由路径常量
-///
-/// 定义所有应用内路由的路径字符串。
-/// 使用静态常量确保路径的一致性和类型安全。
-///
-/// 示例:
-/// ```dart
-/// context.go(AppRoutes.home);
-/// context.go('${AppRoutes.buildingDetailPath}/123');
-/// ```
 abstract class AppRoutes {
   AppRoutes._();
 
@@ -90,18 +81,7 @@ abstract class AppRoutes {
   static const String reportDetailPath = '/report';
 }
 
-/// 路由名称常量
-///
-/// 定义所有路由的名称，用于命名路由导航。
-///
-/// 示例:
-/// ```dart
-/// context.goNamed(RouteNames.home);
-/// context.goNamed(
-///   RouteNames.buildingDetail,
-///   pathParameters: {'id': '123'},
-/// );
-/// ```
+/// 路由名称常量，用于命名路由导航
 abstract class RouteNames {
   RouteNames._();
 
@@ -170,46 +150,4 @@ abstract class RouteNames {
 
   /// 报告详情页
   static const String reportDetail = 'report_detail';
-}
-
-/// 路由参数常量
-///
-/// 定义路由中使用的参数名称。
-class RouteParams {
-  RouteParams._();
-
-  /// 通用ID参数
-  static const String id = 'id';
-
-  /// 建筑ID参数
-  static const String buildingId = 'buildingId';
-
-  /// 检测ID参数
-  static const String detectionId = 'detectionId';
-
-  /// 图片路径列表参数
-  static const String imagePaths = 'imagePaths';
-}
-
-/// 深链接配置
-///
-/// 定义应用的深链接Scheme和Host。
-///
-/// 深链接格式: `dangerhouse://app/<path>`
-///
-/// 示例:
-/// - `dangerhouse://app/home` - 打开首页
-/// - `dangerhouse://app/building/123` - 打开建筑详情
-/// - `dangerhouse://app/profile` - 打开个人中心
-class DeepLinkSchemes {
-  DeepLinkSchemes._();
-
-  /// URL Scheme
-  static const String scheme = 'dangerhouse';
-
-  /// URL Host
-  static const String host = 'app';
-
-  /// 完整前缀
-  static const String prefix = 'dangerhouse://app';
 }

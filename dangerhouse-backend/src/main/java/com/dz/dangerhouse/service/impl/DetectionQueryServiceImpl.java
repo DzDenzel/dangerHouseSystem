@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 
 /**
  * 检测查询服务实现类
- * 提供检测相关数据的查询功能
  */
 @Service
 public class DetectionQueryServiceImpl implements DetectionQueryService {
@@ -25,15 +24,8 @@ public class DetectionQueryServiceImpl implements DetectionQueryService {
     @Autowired
     private FileUploadUtil fileUploadUtil;
 
-    /**
-     * 获取检测任务的图片列表
-     *
-     * @param detectionId 检测任务ID
-     * @return 图片信息列表
-     */
     @Override
     public List<DetectionResultResponse.ImageInfo> getImages(Long detectionId) {
-        // 查询检测任务关联的所有图片
         List<Image> images = imageMapper.selectList(
                 new QueryWrapper<Image>()
                         .lambda()
@@ -41,7 +33,6 @@ public class DetectionQueryServiceImpl implements DetectionQueryService {
                         .orderByAsc(Image::getId)
         );
 
-        // 转换为响应DTO
         return images.stream()
                 .map(image -> {
                     DetectionResultResponse.ImageInfo info = new DetectionResultResponse.ImageInfo();

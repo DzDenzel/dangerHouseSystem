@@ -1,365 +1,205 @@
-<div align="center">
+# dangerhouse-admin-web
 
-# 🏠 危房智能检测系统
+危房智诊系统的管理端 Web 端，Vue 3 + TypeScript + Vite + Element Plus 技术栈，只允许 ADMIN 角色登录，通过 REST API 对接 Spring Boot 后端（开发默认 `http://localhost:8080`）。package.json 里 version 是 `2.9.3`。
 
-**Dangerous House Intelligent Detection System — 管理端 Web**
+主要依赖：vue `3.4.21` / vite `5.2.8` / typescript `5.4.5` / element-plus `2.7.0` / pinia `2.1.7` / vue-router `4.3.0` / axios `1.13.6` / echarts `5.5.0`。
 
-[![Vue](https://img.shields.io/badge/Vue-3.4-4FC08D?style=flat-square&logo=vue.js&logoColor=white)](https://vuejs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.4-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Element Plus](https://img.shields.io/badge/Element%20Plus-2.7-409EFF?style=flat-square&logo=element&logoColor=white)](https://element-plus.org/)
-[![Vite](https://img.shields.io/badge/Vite-5.2-646CFF?style=flat-square&logo=vite&logoColor=white)](https://vitejs.dev/)
-[![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-v3.3-orange?style=flat-square)](#-版本历史)
+## 功能范围
 
-**面向管理员的数据看板、建筑档案、检测管理与系统配置后台**
+- 数据看板 `src/views/dashboard`：统计卡片，配合柱状图、饼图、雷达图、漏斗图（图表组件在同目录 `components/` 下，基于 ECharts 封装）
+- 建筑管理 `src/views/building`：建筑列表、建筑详情、高危建筑
+- 检测管理 `src/views/detection`：检测记录列表、检测详情、检测报告（报告详情与 PDF 下载）
+- 系统管理 `src/views/system`：用户管理（分页查询、启用停用、设为/取消检测员）、操作日志
+- 登录 `src/views/login`，错误页 `src/views/error-page/401.vue` 与 `404.vue`，路由重定向 `src/views/redirect`
 
-[项目简介](#-项目简介) • [核心能力](#-核心能力) • [技术架构](#-技术架构) • [快速开始](#-快速开始) • [版本历史](#-版本历史)
+一共 17 个 vue 文件，没有角色/菜单/部门/字典这类通用后台页面。系统管理这组路由是否注册由 `VITE_ENABLE_SYSTEM_PAGES` 决定，置为 `false` 时侧边栏不出现该项。
 
-</div>
+登录成功后落在 `/dashboard`。
 
----
+## 技术栈
 
-> **当前版本**：v3.3  
-> **文档更新**：2026-06-04
+| 用途 | 依赖 | package.json 版本 |
+| --- | --- | --- |
+| 框架 | vue | ^3.4.21 |
+| 路由 | vue-router | ^4.3.0 |
+| 状态 | pinia | ^2.1.7 |
+| UI | element-plus | ^2.7.0 |
+| 图标 | @element-plus/icons-vue | ^2.3.1 |
+| 图表 | echarts | ^5.5.0 |
+| HTTP | axios | ^1.13.6 |
+| 构建 | vite | ^5.2.8 |
+| 类型 | typescript | ^5.4.5 |
+| 样式 | sass + unocss | ^1.75.0 / ^0.58.9 |
+| 规范 | eslint + prettier + stylelint | ^8.57.0 / ^3.2.5 / ^16.3.1 |
+| 提交 | husky + lint-staged + cz-git | ^9.0.11 / ^15.2.2 / ^1.9.1 |
 
-## 📋 目录
+`unplugin-auto-import` 与 `unplugin-vue-components` 已接好，`ref`、`ElMessage` 以及 `src/components` 下的组件不写 import 也能用，图标走 `unplugin-icons` 的 `ep` 集合。
 
-- [项目简介](#-项目简介)
-- [核心能力](#-核心能力)
-- [技术架构](#-技术架构)
-- [技术栈](#-技术栈)
-- [快速开始](#-快速开始)
-- [项目结构](#-项目结构)
-- [配置说明](#-配置说明)
-- [构建与部署](#-构建与部署)
-- [开发指南](#-开发指南)
-- [常见问题](#-常见问题)
-- [贡献指南](#-贡献指南)
-- [版本历史](#-版本历史)
-- [许可证](#-许可证)
+依赖里还挂着 `stompjs`、`sockjs-client`、`@wangeditor/editor`、`sortablejs`、`xlsx`，当前 src 下没有实际引用，是跟随模板带过来的。
 
----
+## 快速开始
 
-## 📖 项目简介
-
-`dangerhouse-admin-web` 是危房智能检测系统的 **管理端 Web 应用**，基于 **Vue 3 + TypeScript + Element Plus + Vite** 构建。仅 **管理员（ADMIN）** 可登录使用，提供数据看板、建筑档案、检测任务、报告管理、用户与检测员身份管理、操作日志等能力，通过 REST API 与 Java 后端通信。
-
-### 系统定位
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    危房智能检测系统整体架构                        │
-├─────────────────────────────────────────────────────────────────┤
-│  ┌─────────────────┐    ┌─────────────────┐    ┌────────────┐ │
-│  │ 管理端 Web      │    │  后端服务       │    │ AI 检测服务 │ │
-│  │ (本项目)        │ ←→ │  Spring Boot    │ ←→ │  FastAPI    │ │
-│  └─────────────────┘    └─────────────────┘    └────────────┘ │
-│  ┌─────────────┐                                                │
-│  │ 移动端 App  │ ←→ 同一后端 API                                 │
-│  └─────────────┘                                                │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-### 核心价值
-
-| 维度 | 说明 |
-| :--- | :--- |
-| **监管可视化** | ECharts 多维度图表展示检测统计、风险分布与趋势 |
-| **权限隔离** | 登录携带 `clientType=WEB`，后端校验仅 ADMIN 可进入后台 |
-| **账户安全** | 修改密码、退出拉黑 Token、记住账号不存密码 |
-| **运维管理** | 用户状态、检测员身份切换、操作日志审计 |
-
----
-
-## ✨ 核心能力
-
-### 智能检测与档案
-
-- **建筑档案**：列表、详情、创建/编辑、图片上传、归属与检测员字段展示
-- **检测管理**：任务列表、详情、多图结果、状态流转与报告关联
-- **报告管理**：报告生成、详情查看、PDF 下载
-
-### 可视化看板
-
-- 检测数据大屏：统计、风险分布、趋势分析
-- 多图表联动：雷达图、饼图、柱状图、漏斗图
-
-### 系统管理
-
-- **用户管理**：分页查询、状态管理、设为/取消检测员
-- **操作日志**：管理员操作审计与追溯
-- **账户安全**：顶栏修改密码、退出确认对话框
-
----
-
-## 🏗️ 技术架构
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                        前端应用层                            │
-│  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐           │
-│  │ 登录认证 │ │ 检测管理 │ │ 建筑档案 │ │ 系统设置 │           │
-│  └────┬────┘ └────┬────┘ └────┬────┘ └────┬────┘           │
-│       └───────────┴───────────┴───────────┘                 │
-│                        Pinia 状态管理                        │
-│                        Axios HTTP 客户端                     │
-└────────────────────────┼────────────────────────────────────┘
-                         │ HTTP/HTTPS  /api
-┌────────────────────────┼────────────────────────────────────┐
-│              Spring Boot 后端 + MySQL + Redis                  │
-└─────────────────────────────────────────────────────────────┘
-```
-
----
-
-## 🛠️ 技术栈
-
-| 层级 | 技术 | 版本 | 说明 |
-| :--- | :--- | :--- | :--- |
-| **框架** | Vue | 3.4.x | 渐进式前端框架 |
-| **语言** | TypeScript | 5.4.x | 类型安全 |
-| **UI** | Element Plus | 2.7.x | 企业级组件库 |
-| **状态** | Pinia | 2.1.x | 官方推荐状态管理 |
-| **路由** | Vue Router | 4.3.x | SPA 路由 |
-| **构建** | Vite | 5.2.x | 开发与生产构建 |
-| **HTTP** | Axios | 1.13.x | API 请求 |
-| **图表** | ECharts | 5.5.x | 数据可视化 |
-| **样式** | SCSS + UnoCSS | - | 样式与原子类 |
-| **规范** | ESLint + Prettier + Stylelint | - | 代码质量工具 |
-
----
-
-## 🚀 快速开始
-
-### 环境要求
-
-| 依赖 | 版本要求 |
-| :--- | :--- |
-| **Node.js** | >= 18.0.0 |
-| **pnpm** | >= 8.0.0（项目强制使用 pnpm） |
-| **后端服务** | `http://localhost:8080` 已启动 |
-
-### 安装步骤
+环境要求：Node >= 18.0.0（package.json `engines`），包管理器只能用 pnpm —— `preinstall` 脚本是 `npx only-allow pnpm`，用 npm 或 yarn 装依赖会直接报错退出。后端服务需要先在 `http://localhost:8080` 启动。
 
 ```bash
-# 1. 克隆项目
-git clone https://github.com/DzDenzel/dangerHouseSystem.git
-
-# 2. 进入管理端目录
 cd dangerHouseSystem/dangerhouse-admin-web
 
-# 3. 安装依赖
 pnpm install
-
-# 4. 启动开发服务器（默认端口 3000）
 pnpm run dev
+```
 
-# 5. 生产构建
+`dev` 脚本是 `vite serve --mode development`。开发服务器监听 `0.0.0.0`、端口 `9090`、自动打开浏览器，访问地址是 `http://localhost:9090`。
+
+生产构建：
+
+```bash
 pnpm run build:prod
 ```
 
-开发环境默认通过 `.env.development` 将 API 代理到 `http://localhost:8080/api`。
+`build:prod` 是 `vite build --mode production && vue-tsc --noEmit`，产物输出到 `dist/`。构建后还会跑一次 vue-tsc 类型检查，类型报错会让整条命令失败。
 
----
-
-## 📁 项目结构
+## 项目结构
 
 ```
 dangerhouse-admin-web/
-├── public/                  # 静态资源
+├── docs/                    # 后端接口文档
 ├── src/
-│   ├── api/                 # API 接口（auth、building、detection、report、user 等）
-│   ├── assets/              # 图片、图标、样式
-│   ├── components/          # 公共组件（Pagination、Upload、SvgIcon 等）
-│   ├── layout/              # 布局（NavBar、Sidebar、TagsView）
-│   ├── router/              # 路由与守卫
-│   ├── store/               # Pinia 模块
+│   ├── api/                 # 接口定义，9 个模块，按业务分目录
+│   ├── assets/              # 图片与 svg 图标
+│   ├── components/          # 公共组件：Pagination、Upload、SvgIcon、Breadcrumb、Hamburger、AppLink
+│   ├── directive/           # 自定义指令
+│   ├── enums/               # 枚举常量
+│   ├── lang/                # vue-i18n 语言包
+│   ├── layout/              # 主框架布局：NavBar、Sidebar、TagsView、AppMain
+│   ├── plugins/             # i18n、icons、permission 路由守卫
+│   ├── router/              # 仅 index.ts，静态路由 + createWebHashHistory
+│   ├── store/modules/       # pinia：user、permission、app、settings、tagsView
 │   ├── styles/              # 全局样式
-│   ├── utils/               # 工具函数
-│   ├── views/               # 页面（dashboard、building、detection、system、login）
+│   ├── typings/             # 类型声明
+│   ├── utils/               # request.ts 等
+│   ├── views/               # 页面
 │   ├── App.vue
 │   └── main.ts
-├── .env.development         # 开发环境变量
-├── .env.production          # 生产环境变量
+├── .env.development
+├── .env.production
+├── index.html
+├── uno.config.ts
 ├── vite.config.ts
-├── package.json
-└── README.md
+└── package.json
 ```
 
----
+根目录没有 `public/` 目录，`index.html` 也不引用任何静态资源。
 
-## ⚙️ 配置说明
+## 关键约定
 
-### 环境变量（开发）
+**登录与鉴权**
 
-`.env.development` 常用项：
+- 登录请求固定带 `clientType: "WEB"`（`src/views/login/index.vue` 传入，api 层还有 `?? "WEB"` 兜底）
+- token 存在 localStorage 的 `token` 键上，写入在 `src/store/modules/user.ts` 的 `login()`
+- `src/utils/request.ts` 请求拦截器读 token 拼成 `Authorization: Bearer <token>`，但 URL 里含 `/auth/` 的请求不加这个头
+- 响应拦截器认为 code 属于 `{200, 0, "200", "0", "00000"}` 才算成功；code 401 且不是 auth 请求时弹确认框，确认后清 token 并 `location.reload()`
+- 角色校验有两处：`user.ts` 的 `getUserInfo()` 用大小写不敏感的 `=== "ADMIN"` 判断，非 ADMIN 会删 token、重置路由并抛「当前账号无权登录后台，请使用管理员账号」；`permission.ts` 再按路由 `meta.roles` 过滤一遍，roles 里带 `"ROOT"` 的账号直接放行
 
-```env
-VITE_APP_PORT=3000
-VITE_APP_BASE_API=http://localhost:8080/api
-VITE_MOCK_DEV_SERVER=false
-VITE_SYSTEM_LOCAL_MODE=true
-```
+**路由**
 
-本地覆盖可在项目根目录创建 `.env.local`：
+- 路由是 hash 模式（`createWebHashHistory`），部署时服务器不需要配 SPA 的 history 回退
+- `src/router/index.ts` 里只有静态路由：`/login`、`/redirect/:path(.*)`、`/` 下的 `dashboard`、`401`、`404`、`detection/report`
+- 建筑、检测、系统三组业务路由定义在 `src/store/modules/permission.ts`，每条的 `meta.roles` 都是 `["ADMIN"]`，由登录后的角色动态生成
+- `VITE_USE_BACKEND_MENUS=true` 时改从 `GET /menus/routes` 拉菜单，请求失败或返回为空则回退到上面的本地路由；当前配置是 `false`
+- 路由守卫在 `src/plugins/permission.ts`，白名单只有 `["/login"]`，其余按 localStorage 里的 token 判断
 
-```env
-VITE_APP_BASE_API=http://localhost:8080/api
-VITE_SYSTEM_LOCAL_MODE=false
-```
+**接口**
 
-### 与后端协作要点
+- axios 的 `baseURL` 取 `import.meta.env.VITE_APP_BASE_API`，所以 `src/api/` 里的路径一律不写 `/api` 前缀
+- `VITE_SYSTEM_LOCAL_MODE=true` 时，菜单增删改查那一组接口返回本地 mock，实际只有 `GET /menus/routes` 会被请求
 
-- 登录请求需携带 `clientType: "WEB"`。
-- 请求头携带 `Authorization: Bearer <token>`。
-- 退出调用 `POST /api/auth/logout`，确保 Token 进入后端黑名单。
+各模块的接口路径：
 
----
+| 模块 | 主要路径 |
+| --- | --- |
+| `api/auth` | `POST /auth/login`、`POST /auth/register`、`POST /auth/logout`、`GET /auth/check-username/{username}` |
+| `api/user` | `GET/PUT /user/profile`、`PUT /user/password`、`POST /user/avatar`、`GET /users`、`GET /users/{userId}`、`PUT /users/{userId}/status`、`PUT /users/{userId}/inspector` |
+| `api/building` | `POST /buildings`、`PUT/DELETE /buildings/{id}`、`GET /buildings`、`GET /buildings/{id}`、`GET /buildings/by-owner`、`GET /buildings/by-address`、`POST /buildings/{id}/image` |
+| `api/detection` | `POST /detections`、`GET /detections`、`GET /detections/{id}`、`PUT /detections/{id}/cancel`、`DELETE /detections/{id}`、`POST /detections/{id}/start`、`POST/GET /detections/{id}/images` |
+| `api/report` | `POST /reports/generate`、`GET /reports`、`GET /reports/{id}`、`GET /reports/{id}/download` |
+| `api/admin` | `GET /admin/dashboard`、`GET /admin/operation-logs`、`GET /admin/models` |
+| `api/menu` | `GET /menus/routes`、`GET /menus`、`GET /menus/options`、`POST /menus`、`PUT /menus/{id}`、`DELETE /menus/{id}` |
+| `api/file` | `POST /files`、`DELETE /files?filePath=` |
+| `api/ai` | `POST /ai/detect` |
 
-## 📦 构建与部署
+`api/ai`、`api/admin` 的模型列表、`auth/check-username` 目前没有页面调用。
+
+## 环境变量
+
+`.env.development`：
+
+| 变量 | 值 | 作用 |
+| --- | --- | --- |
+| `VITE_APP_BASE_API` | `http://localhost:8080/api` | axios 的 baseURL |
+| `VITE_APP_PORT` | `3000` | 未被读取，见下 |
+| `VITE_MOCK_DEV_SERVER` | `false` | mock 服务开关，插件本身也没在 vite.config.ts 里启用 |
+| `VITE_USE_BACKEND_MENUS` | `false` | 是否用后端菜单 |
+| `VITE_ENABLE_SYSTEM_PAGES` | `true` | 是否注册系统管理路由 |
+| `VITE_SYSTEM_LOCAL_MODE` | `true` | 菜单管理是否走本地 mock |
+
+`.env.production` 里 `VITE_APP_BASE_API=/api`，其余开关相同。
+
+开发环境下 `VITE_APP_BASE_API` 是完整 URL，axios 直接请求 `http://localhost:8080`，`vite.config.ts` 中那条 `"/api"` 代理不会被命中，跨域要由后端放行。
+
+## 构建与代码规范
 
 ```bash
-# 代码检查与格式化
-pnpm run lint:eslint
-pnpm run lint:prettier
-
-# 生产构建（含 vue-tsc 类型检查）
+pnpm run lint:eslint      # eslint --fix --ext .ts,.js,.vue ./src
+pnpm run lint:prettier    # prettier --write
+pnpm run lint:stylelint   # stylelint "**/*.{css,scss,vue}" --fix
+pnpm run lint:lint-staged # lint-staged，husky 的 pre-commit 也走这个
 pnpm run build:prod
 ```
 
-构建产物输出至 `dist/`。部署时需：
+没有 `lint` 或 `build` 这样的简写脚本，写错了 pnpm 会报 missing script。
 
-1. 将 `VITE_APP_BASE_API` 指向生产后端地址。
-2. 配置 Nginx 等反向代理的 `base` 路径与 SPA 回退。
-3. 启用 HTTPS 并限制管理端访问来源。
+提交信息走 Conventional Commits，`commitlint.config.cjs` 限定了 type 枚举；用 `pnpm run commit` 可以走 cz-git 交互式生成。
 
----
+## 常见问题
 
-## 📝 开发指南
+**用 npm 装依赖报错**
 
-### 分支管理
+`preinstall` 是 `npx only-allow pnpm`，只能用 pnpm。装坏了的话 `pnpm store prune && rm -rf node_modules && pnpm install`。
 
-| 分支 | 说明 |
-| :--- | :--- |
-| `master` | 生产分支 |
-| `develop` | 日常开发分支 |
-| `feature/*` | 功能分支 |
-| `hotfix/*` | 紧急修复 |
+**访问 localhost:3000 打不开**
 
-### 提交规范
+开发端口是 9090，写在 `vite.config.ts` 的 `server.port` 里。`.env.development` 里的 `VITE_APP_PORT=3000` 只在 `src/typings/env.d.ts` 声明了类型，没有任何地方读取，改它不起作用。要换端口直接改 vite.config.ts。
 
-采用 [Conventional Commits](https://www.conventionalcommits.org/)：
+**登录成功但马上被踢回登录页**
 
-```bash
-feat(detection): 新增检测报告导出功能
-fix(auth): 修复 Token 刷新后路由守卫失效
-docs: 更新管理端 README
-```
+`getUserInfo()` 拿到角色后如果不是 ADMIN（大小写不敏感），会清 token 并抛「当前账号无权登录后台，请使用管理员账号」。用管理员账号登录。
 
-### 代码规范
+**接口返回 401 后页面弹窗重载**
 
-- 组件：**PascalCase**；文件：**kebab-case**
-- 变量/函数：**camelCase**；常量：**UPPER_SNAKE_CASE**
-- 提交前运行 `pnpm run lint:lint-staged`（Husky 已集成）
+`request.ts` 的响应拦截器对 401 的处理就是清 token + `location.reload()`，这里不是 bug。token 过期的正常表现是重新登录一次。
 
----
+**侧边栏没有「系统管理」**
 
-## ❓ 常见问题
+检查 `.env.development` 的 `VITE_ENABLE_SYSTEM_PAGES` 是否被改成了 `false`。
 
-### Q: 安装依赖失败？
+**构建后页面空白**
 
-**A:** 项目仅允许 pnpm。可尝试：
+先看控制台是否 404。`vite.config.ts` 没有配置 `base`，走的是默认 `/`，资源以绝对路径引用，部署到 `/admin` 这类子路径下会全部取不到。要么在 vite.config.ts 补 `base`，要么按根路径部署。另外路由是 hash 模式，nginx 不需要配 history 回退规则。
 
-```bash
-pnpm store prune
-rm -rf node_modules
-pnpm install
-```
+**后端的 401 提示语**
 
-### Q: 开发服务器启动失败？
+非 auth 请求返回 401 时弹的是前端写死的「当前登录状态已失效，请重新登录」，不是后端返回的 message。
 
-**A:** 检查 3000 端口占用，或在 `vite.config.ts` 中修改 `server.port`。
+## 参考
 
-### Q: 登录后接口 401？
+- `docs/后端接口文档.md`：后端全部 38 个接口的完整说明（方法、路径、权限、参数、响应示例），与后端 Controller 逐一核对过
 
-**A:** 确认后端已启动；检查 `VITE_APP_BASE_API`；确认使用管理员账号且 `clientType=WEB`。
+下面是几个需要留意的前后端不一致点，接口文档里也标注了：
 
-### Q: 构建后页面空白？
+- `GET /reports`（报告列表）前端定义了但**后端未实现**，报告信息目前只能从 `GET /detections` 响应的 `report` 字段取
+- `POST /files`、`DELETE /files` 前端定义了但**后端未实现**，`SingleUpload.vue`、`MultiUpload.vue` 是依赖它们的模板遗留组件；上传应改用业务接口（`/user/avatar`、`/buildings/{id}/image`、`/detections/{id}/images`）
+- `menus` 系列后端没有对应 Controller，当前 `VITE_SYSTEM_LOCAL_MODE=true` 走本地 mock，实际生效的是前端静态路由
+- `POST /auth/logout` 会被 `request.ts` 的「`/auth/` 请求不加 Authorization 头」规则挡住，导致后端拿不到令牌、退出不会拉黑 token
+- `UserController.java` 里 `PUT /users/{userId}/inspector` 的成功文案此前是乱码（编码损坏），已修复
 
-**A:** 检查 `vite.config.ts` 的 `base` 是否与部署子路径一致。
-
-### Q: 非管理员能打开页面？
-
-**A:** 前端刷新时会校验 ADMIN 角色；非管理员应被清理会话并跳转登录页。若异常，检查后端角色与 Token 内容。
-
----
-
-## 🤝 贡献指南
-
-1. Fork 本仓库
-2. 创建功能分支 (`git checkout -b feature/amazing-feature`)
-3. 提交更改 (`git commit -m 'feat: add amazing feature'`)
-4. 推送到分支并提交 Pull Request
-
----
-
-## 📅 版本历史
-
-### v3.3 (2026-04-15)
-
-**本次 3.3 技术增量更新：**
-
-- ✅ 顶部导航栏用户菜单新增稳定可用的「修改密码」入口
-- ✅ 交付管理员修改密码对话框，覆盖原密码、新密码与确认密码的完整表单校验
-- ✅ 退出登录确认由提示框升级为独立居中对话框
-- ✅ 后台登录页与侧边栏统一切换为最新项目 Logo
-- ✅ 顶栏用户操作区交互结构完成重构
-
-### v3.2.1 (2026-04-14)
-
-**本次 3.2.1 技术增量更新：**
-
-- ✅ 用户管理页「设为检测员 / 取消检测员」操作入口
-- ✅ Web 端 `USER` 与 `INSPECTOR` 单一业务身份切换
-- ✅ 用户详情抽屉角色信息即时更新
-
-### v3.2 (2026-04-13)
-
-**本次 3.2 技术增量更新：**
-
-- ✅ 登录请求新增 `clientType = WEB`，后端统一校验后台登录权限
-- ✅ 「记住我」只记住账号，不再本地保存密码
-- ✅ 主动退出调用 `/auth/logout`，旧 Token 立即失效
-- ✅ 页面刷新增加管理员角色兜底校验
-- ✅ 建筑/检测/报告页补齐归属字段展示
-- ✅ 用户管理统计口径修正
-
-### v3.1 及更早
-
-- 数据看板、检测管理、报告下载、用户列表等基础后台能力
-- 对接后端 v3.x 检测状态流与 Redis 缓存体系
-
----
-
-## 📄 许可证
-
-本项目基于 [MIT License](LICENSE) 开源协议发布。
-
----
-
-## 📞 联系方式
-
-- 🐛 Issue：[GitHub Issues](https://github.com/DzDenzel/dangerHouseSystem/issues)
-- 📖 关联文档：[后端 README](../dangerhouse-backend/Readme.md) · [移动端 README](../dangerhouse-mobile-app/Readme.md) · [AI 服务 README](../dangerhouse-ai-service/Readme.md)
-
----
-
-<div align="center">
-
-**⭐ 如果这个项目对你有帮助，请给一个 Star 支持一下！⭐**
-
-Made with ❤️ by Danger House Team
-
-**让危房检测更智能、更高效**
-
-</div>
+<!-- TODO: 待确认 生产环境是否有既定的部署子路径约定（若需子路径部署，vite.config.ts 需补 base，当前未配置） -->

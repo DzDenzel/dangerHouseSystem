@@ -2,36 +2,17 @@ import 'package:dio/dio.dart';
 
 /// 应用程序异常基类
 ///
-/// 所有应用程序异常都继承自此类，提供统一的异常处理接口。
-/// 支持从 [DioException] 自动转换为对应的异常类型。
-///
-/// 示例:
-/// ```dart
-/// try {
-///   await dio.get('/api/data');
-/// } on DioException catch (e) {
-///   throw AppException.fromDioError(e);
-/// }
-/// ```
+/// 所有应用异常的公共父类，支持从 [DioException] 自动映射为具体子类。
 abstract class AppException implements Exception {
-  /// 异常消息
   final String message;
 
   /// HTTP状态码
   final int? statusCode;
 
-  /// 原始错误对象
   final dynamic originalError;
 
-  /// 堆栈跟踪
   final StackTrace? stackTrace;
 
-  /// 创建应用异常
-  ///
-  /// [message] 异常消息
-  /// [statusCode] HTTP状态码（可选）
-  /// [originalError] 原始错误对象（可选）
-  /// [stackTrace] 堆栈跟踪（可选）
   const AppException(
     this.message, {
     this.statusCode,
@@ -42,9 +23,8 @@ abstract class AppException implements Exception {
   @override
   String toString() => message;
 
-  /// 从 [DioException] 创建对应的异常类型
+  /// 根据 [DioException] 的类型/状态码映射到对应的异常子类
   ///
-  /// 根据错误类型自动映射到适当的异常子类：
   /// - 超时错误 -> [NetworkTimeoutException]
   /// - 连接错误 -> [NetworkConnectionException]
   /// - 401错误 -> [UnauthorizedException]
@@ -105,7 +85,7 @@ abstract class AppException implements Exception {
     final data = response?.data;
 
     String message = _getDefaultMessageForStatus(statusCode);
-    
+
     if (data is Map && data['message'] != null) {
       final serverMessage = data['message'].toString();
       if (serverMessage.isNotEmpty && serverMessage != 'Unauthorized') {
@@ -160,35 +140,25 @@ abstract class AppException implements Exception {
   }
 }
 
-/// 网络超时异常
-///
-/// 当网络请求超时时抛出，包括连接超时、发送超时和接收超时。
+/// 连接超时、发送超时、接收超时
 class NetworkTimeoutException extends AppException {
   const NetworkTimeoutException(String message, {int? statusCode, dynamic originalError, StackTrace? stackTrace})
       : super(message, statusCode: statusCode, originalError: originalError, stackTrace: stackTrace);
 }
 
-/// 网络连接异常
-///
-/// 当无法建立网络连接时抛出，通常是由于网络不可用或服务器无法访问。
+/// 网络不可用或服务器无法访问
 class NetworkConnectionException extends AppException {
   const NetworkConnectionException(String message, {int? statusCode, dynamic originalError, StackTrace? stackTrace})
       : super(message, statusCode: statusCode, originalError: originalError, stackTrace: stackTrace);
 }
 
-/// 服务器异常
-///
-/// 当服务器返回5xx错误或发生服务器端错误时抛出。
+/// 服务器 5xx 错误
 class ServerException extends AppException {
   const ServerException(String message, {int? statusCode, dynamic originalError, StackTrace? stackTrace})
       : super(message, statusCode: statusCode, originalError: originalError, stackTrace: stackTrace);
 }
 
-/// 未授权异常
-///
-/// 当用户未登录或登录已过期时抛出（HTTP 401）。
-///
-/// 通常需要引导用户重新登录。
+/// 未登录或登录已过期（HTTP 401），通常需要引导用户重新登录
 class UnauthorizedException extends AppException {
   const UnauthorizedException(String message, {int? statusCode, dynamic originalError, StackTrace? stackTrace})
       : super(message, statusCode: statusCode, originalError: originalError, stackTrace: stackTrace);
@@ -197,17 +167,13 @@ class UnauthorizedException extends AppException {
       : super('登录已过期，请重新登录', statusCode: statusCode, originalError: originalError, stackTrace: stackTrace);
 }
 
-/// 禁止访问异常
-///
-/// 当用户没有权限访问资源时抛出（HTTP 403）。
+/// 无权限访问资源（HTTP 403）
 class ForbiddenException extends AppException {
   const ForbiddenException(String message, {int? statusCode, dynamic originalError, StackTrace? stackTrace})
       : super(message, statusCode: statusCode, originalError: originalError, stackTrace: stackTrace);
 }
 
-/// 资源不存在异常
-///
-/// 当请求的资源不存在时抛出（HTTP 404）。
+/// 请求的资源不存在（HTTP 404）
 class NotFoundException extends AppException {
   const NotFoundException(String message, {int? statusCode, dynamic originalError, StackTrace? stackTrace})
       : super(message, statusCode: statusCode, originalError: originalError, stackTrace: stackTrace);
@@ -216,57 +182,43 @@ class NotFoundException extends AppException {
       : super('请求的资源不存在', statusCode: statusCode, originalError: originalError, stackTrace: stackTrace);
 }
 
-/// 验证异常
-///
-/// 当请求参数验证失败时抛出（HTTP 400）。
+/// 请求参数校验失败（HTTP 400）
 class ValidationException extends AppException {
   const ValidationException(String message, {int? statusCode, dynamic originalError, StackTrace? stackTrace})
       : super(message, statusCode: statusCode, originalError: originalError, stackTrace: stackTrace);
 }
 
-/// 请求取消异常
-///
-/// 当请求被主动取消时抛出。
+/// 请求被主动取消
 class RequestCancelledException extends AppException {
   const RequestCancelledException(String message, {int? statusCode, dynamic originalError, StackTrace? stackTrace})
       : super(message, statusCode: statusCode, originalError: originalError, stackTrace: stackTrace);
 }
 
-/// 请求频率限制异常
-///
-/// 当请求过于频繁被服务器限制时抛出（HTTP 429）。
+/// 请求过于频繁被限流（HTTP 429）
 class RateLimitException extends AppException {
   const RateLimitException(String message, {int? statusCode, dynamic originalError, StackTrace? stackTrace})
       : super(message, statusCode: statusCode, originalError: originalError, stackTrace: stackTrace);
 }
 
-/// 跨域请求异常
-///
-/// 当Web端跨域请求失败时抛出，通常需要后端配置CORS。
+/// Web 端跨域请求失败，通常需要后端配置 CORS
 class CorsException extends AppException {
   const CorsException(String message, {int? statusCode, dynamic originalError, StackTrace? stackTrace})
       : super(message, statusCode: statusCode, originalError: originalError, stackTrace: stackTrace);
 }
 
-/// 未知异常
-///
-/// 当无法确定具体错误类型时抛出。
+/// 无法确定具体错误类型
 class UnknownException extends AppException {
   const UnknownException(String message, {int? statusCode, dynamic originalError, StackTrace? stackTrace})
       : super(message, statusCode: statusCode, originalError: originalError, stackTrace: stackTrace);
 }
 
-/// 缓存异常
-///
-/// 当本地缓存操作失败时抛出。
+/// 本地缓存操作失败
 class CacheException extends AppException {
   const CacheException(String message, {int? statusCode, dynamic originalError, StackTrace? stackTrace})
       : super(message, statusCode: statusCode, originalError: originalError, stackTrace: stackTrace);
 }
 
-/// 解析异常
-///
-/// 当数据解析失败时抛出，如JSON解析错误。
+/// 数据解析失败，如 JSON 解析错误
 class ParseException extends AppException {
   const ParseException(String message, {int? statusCode, dynamic originalError, StackTrace? stackTrace})
       : super(message, statusCode: statusCode, originalError: originalError, stackTrace: stackTrace);

@@ -13,7 +13,6 @@ import java.time.LocalDate;
 
 /**
  * 操作日志服务实现类
- * 提供操作日志的查询功能
  */
 @Slf4j
 @Service
@@ -24,28 +23,20 @@ public class OperationLogServiceImpl implements OperationLogService {
 
     /**
      * 分页查询操作日志
-     * 支持按操作类型、状态、时间范围筛选
      *
-     * @param page      页码
-     * @param size      每页数量
      * @param operation 操作类型（模糊查询）
-     * @param username  用户名（暂未使用）
-     * @param startDate 开始日期
-     * @param endDate   结束日期
+     * @param username  用户名（当前未参与筛选条件）
      * @param status    状态（1成功 0失败）
-     * @return 分页结果
      */
     @Override
     public Page<OperationLog> getOperationLogs(Integer page, Integer size, String operation, String username, LocalDate startDate, LocalDate endDate, Integer status) {
         Page<OperationLog> logPage = new Page<>(page, size);
         LambdaQueryWrapper<OperationLog> wrapper = new LambdaQueryWrapper<>();
 
-        // 构建查询条件
         wrapper.like(operation != null && !operation.isEmpty(), OperationLog::getOperation, operation)
                .eq(status != null, OperationLog::getStatus, status)
                .orderByDesc(OperationLog::getCreateTime);
 
-        // 时间范围过滤
         if (startDate != null) {
             wrapper.ge(OperationLog::getCreateTime, startDate.atStartOfDay());
         }

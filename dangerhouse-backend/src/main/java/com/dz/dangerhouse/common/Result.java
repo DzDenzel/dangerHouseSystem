@@ -4,13 +4,9 @@ import cn.hutool.core.util.IdUtil;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * 统一API响应结构
- * 包含状态码、消息、数据、时间戳和请求ID
- *
- * @param <T> 响应数据类型
  */
 @Data
 public class Result<T> implements Serializable {
@@ -40,8 +36,6 @@ public class Result<T> implements Serializable {
      * 请求唯一标识
      */
     private String requestId;
-
-    private static final AtomicLong SEQUENCE = new AtomicLong(0);
 
     public Result() {}
 
@@ -116,37 +110,6 @@ public class Result<T> implements Serializable {
      */
     public static <T> Result<T> of(Integer code, String message, T data) {
         return new Result<>(code, message, data);
-    }
-
-    /**
-     * 分页结果包装器
-     *
-     * @param <T> 记录类型
-     */
-    public static class PageResult<T> {
-        private Long total;
-        private Integer page;
-        private Integer pageSize;
-        private java.util.List<T> records;
-
-        public PageResult() {}
-
-        public PageResult(Long total, Integer page, Integer pageSize, java.util.List<T> records) {
-            this.total = total;
-            this.page = page;
-            this.pageSize = pageSize;
-            this.records = records;
-        }
-
-        // Getters and Setters
-        public Long getTotal() { return total; }
-        public void setTotal(Long total) { this.total = total; }
-        public Integer getPage() { return page; }
-        public void setPage(Integer page) { this.page = page; }
-        public Integer getPageSize() { return pageSize; }
-        public void setPageSize(Integer pageSize) { this.pageSize = pageSize; }
-        public java.util.List<T> getRecords() { return records; }
-        public void setRecords(java.util.List<T> records) { this.records = records; }
     }
 
     /**

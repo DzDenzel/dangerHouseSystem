@@ -1,4 +1,4 @@
-import os, json, random
+import json, random
 from pathlib import Path
 import numpy as np
 import cv2
@@ -12,19 +12,17 @@ from torchvision.models.detection import (
 )
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 
-# ----------------------------
-# 你需要改的配置
-# ----------------------------
+# 配置
 DATA_ROOT = Path(r"./HRCDS")  # 数据集根目录
 
 # 过滤太小的碎框（裂缝容易碎）
 MIN_AREA_PX =120
 
 # 训练参数
-EPOCHS = 20                       #训练轮数
-BATCH_SIZE = 8                    #每批图片
-LR = 2e-5                         #学习率
-NUM_WORKERS = 4  # 若仍报错，先改 0 便于调试             #数据加载线程
+EPOCHS = 20
+BATCH_SIZE = 8
+LR = 2e-5
+NUM_WORKERS = 4  # 若仍报错，先改 0 便于调试
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 # Faster R-CNN：num_classes=2 表示 1个前景类(damage/crack)+背景
@@ -41,9 +39,7 @@ IOU_THR = 0.5
 USE_MORPH = True
 
 
-# ----------------------------
 # 工具：读取原始mask -> 自动前景二值
-# ----------------------------
 def mask_to_binary_auto(mask_path: Path) -> np.ndarray:
     """
     自动提取前景（damage）：
@@ -89,9 +85,7 @@ def binary_to_boxes(binary_mask: np.ndarray, min_area: int = 20):
     return boxes
 
 
-# ----------------------------
 # 工具：读取 COCO json bbox（可选）
-# ----------------------------
 def load_boxes_from_annotations(ann_path: Path):
     """
     仅演示 COCO json 的 bbox 读取。
@@ -124,9 +118,7 @@ def load_boxes_from_annotations(ann_path: Path):
     return "coco", file2boxes
 
 
-# ----------------------------
 # Dataset（mask用stem映射匹配）
-# ----------------------------
 class CrackDetDataset(Dataset):
     """
     适配目录结构：
@@ -188,11 +180,7 @@ class CrackDetDataset(Dataset):
             raise FileNotFoundError(f"Failed to read image: {img_path}")
         img = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
 
-        # -------- 1) 优先-------------------------------------=.12333223./2321232232./
-        # 
-        # 
-        # \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-        # \从 COCO annotation 获取 bbox --------
+        # -------- 1) 优先从 COCO annotation 获取 bbox --------
         boxes = None
         if self.coco_map is not None:
             boxes = self.coco_map.get(fn, None)
@@ -238,9 +226,7 @@ def collate_fn(batch):
     return tuple(zip(*batch))
 
 
-# ----------------------------
 # 模型
-# ----------------------------
 def build_model(num_classes=2):
     weights = FasterRCNN_ResNet50_FPN_V2_Weights.DEFAULT
     model = fasterrcnn_resnet50_fpn_v2(weights=weights)
@@ -249,9 +235,7 @@ def build_model(num_classes=2):
     return model
 
 
-# ----------------------------
 # 评估：简化版 IoU@0.5 的 P/R/F1
-# ----------------------------
 def compute_iou(boxA, boxB):
     xA = max(boxA[0], boxB[0])
     yA = max(boxA[1], boxB[1])
@@ -339,9 +323,7 @@ def test_and_save_vis(model, dataset, save_dir: Path, score_thr=0.05, max_images
         cv2.imwrite(str(save_dir / f"pred_{i:04d}.jpg"), cv2.cvtColor(vis, cv2.COLOR_RGB2BGR))
 
 
-# ----------------------------
 # 主流程：train/val/test + 断点续训
-# ----------------------------
 def main():
     torch.manual_seed(0)
     random.seed(0)
@@ -369,7 +351,7 @@ def main():
 
     model = build_model(NUM_CLASSES).to(DEVICE)
 
-    # ✅ 建议：减少每张图输出框数量，降低 FP（提升 P/F1）
+    # 减少每张图输出框数量，降低 FP（提升 P/F1）
     try:
         model.roi_heads.detections_per_img = 30
     except Exception:
@@ -378,11 +360,11 @@ def main():
     params = [p for p in model.parameters() if p.requires_grad]
     optim = torch.optim.AdamW(params, lr=LR, weight_decay=1e-4)
 
-    # ✅ AMP 混合精度（cuda 才启用）
+    # AMP 混合精度（cuda 才启用）
     use_amp = (DEVICE.startswith("cuda"))
     scaler = torch.cuda.amp.GradScaler(enabled=use_amp)
 
-    # ---- 断点续训 ----
+    # 断点续训
     ckpt_path = OUT_DIR / "checkpoint.pt"
     start_epoch = 1
     best_f1 = -1.0
@@ -413,7 +395,7 @@ def main():
     #                 loss_dict = model(images, targets)
     #                 loss = sum(loss_dict.values())
     #             scaler.scale(loss).backward()
-    #             # ✅ 梯度裁剪（先 unscale）
+    #             # 梯度裁剪（先 unscale）
     #             scaler.unscale_(optim)
     #             torch.nn.utils.clip_grad_norm_(model.parameters(), 5.0)
     #             scaler.step(optim)
@@ -428,7 +410,7 @@ def main():
     #         loss_sum += float(loss.item())
     #         pbar.set_postfix(loss=float(loss.item()))
 
-    #     # ✅ 每轮验证：自动找最佳阈值下的 F1
+    #     # 每轮验证：自动找最佳阈值下的 F1
     #     bestm = evaluate_best_f1(model, val_loader, iou_thr=IOU_THR)
     #     print(f"[Epoch {epoch}] train_loss={loss_sum/len(train_loader):.6f}  "
     #           f"Val bestF1={bestm['F1']:.3f} @thr={bestm['thr']:.2f}  "
@@ -451,9 +433,7 @@ def main():
     #         (OUT_DIR / "best_threshold.txt").write_text(f"{best_thr}\n", encoding="utf-8")
             # print(f"  -> saved best.pt (F1={best_f1:.3f}, thr={best_thr:.2f})")
 
-    # ----------------------------
     # 测试：用 best.pt + best_thr
-    # ----------------------------
     best_pt = OUT_DIR / "best.pt"
     if best_pt.exists():
         model.load_state_dict(torch.load(best_pt, map_location=DEVICE))

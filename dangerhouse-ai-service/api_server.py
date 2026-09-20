@@ -1,12 +1,10 @@
-import os
-import io
 import cv2
 import torch
 import numpy as np
 import uvicorn
 import logging
 import base64
-from typing import List, Optional, Any, Annotated
+from typing import List, Optional, Annotated
 from fastapi import FastAPI, File, UploadFile, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
@@ -20,16 +18,14 @@ from torchvision.models.detection import (
 )
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 
-# ----------------------------
 # 1) 配置常量与日志
-# ----------------------------
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger("DamageAPI")
 
 WEIGHT_PATH = "./runs_detect/best.pt"
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
-# 整体评估阈值 (与之前 api_server.py 逻辑保持一致)
+# 整体评估阈值
 BUILDING_B_LEVEL_CRACK_THRESHOLD = 3
 BUILDING_C_LEVEL_CRACK_THRESHOLD = 6
 BUILDING_D_LEVEL_CRACK_THRESHOLD = 10
@@ -44,9 +40,7 @@ class ModelContainer:
 
 container = ModelContainer()
 
-# ----------------------------
 # 2) Pydantic 数据模型 (适配 Java DTO)
-# ----------------------------
 
 class DetectionItem(BaseModel):
     id: int = Field(..., description="损伤ID")
@@ -83,12 +77,11 @@ class APIResponse(BaseModel):
     message: str
     data: Optional[DataInfo] = None
 
-# ----------------------------
 # 3) 核心算法逻辑
-# ----------------------------
 def build_model(num_classes=2, detections_per_img=30, nms_thresh=0.3):
     weights = FasterRCNN_ResNet50_FPN_V2_Weights.DEFAULT
-    model = fasterrcnn_resnet50_fpn_v2(weights=weights) #(weights=None，weights_backbone=None)不会走网络下载fastrrcnn
+    # weights=DEFAULT：首次运行会联网下载 COCO 预训练权重，离线环境需预置缓存
+    model = fasterrcnn_resnet50_fpn_v2(weights=weights)
     in_features = model.roi_heads.box_predictor.cls_score.in_features
     model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes)
     model.roi_heads.detections_per_img = int(detections_per_img)
@@ -194,14 +187,12 @@ def encode_image_to_base64(img_bgr):
     _, buffer = cv2.imencode('.jpg', img_bgr)
     return base64.b64encode(buffer).decode('utf-8')
 
-# ----------------------------
 # 4) FastAPI 生命周期管理
-# ----------------------------
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info(f"正在加载模型，设备: {DEVICE}...")
     container.model = load_model_instance(WEIGHT_PATH, DEVICE)
-    logger.info("模型加载完成 ✅")
+    logger.info("模型加载完成")
     yield
     if container.model:
         del container.model
@@ -210,9 +201,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="Building Damage Detection API", version="2.1.0", lifespan=lifespan)
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
-# ----------------------------
 # 5) API 接口实现
-# ----------------------------
 @app.post("/api/v1/detect_damage", response_model=APIResponse)
 async def detect_damage(
     images: Annotated[List[UploadFile], File(description="上传的图片文件列表")],

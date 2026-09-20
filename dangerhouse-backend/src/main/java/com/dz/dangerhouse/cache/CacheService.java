@@ -270,7 +270,6 @@ public class CacheService {
      * 类型转换（支持自动修复）
      */
     private <T> T castValue(String key, Object value, Class<T> type) {
-        // 类型匹配直接返回
         if (type.isInstance(value)) {
             return type.cast(value);
         }
@@ -285,7 +284,6 @@ public class CacheService {
             return null;
         }
 
-        // 尝试使用Jackson转换
         try {
             T converted = objectMapper.convertValue(value, type);
             log.info("缓存值自动转换成功, key={}, 目标类型={}", key, type.getName());

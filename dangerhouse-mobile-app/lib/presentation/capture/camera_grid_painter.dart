@@ -9,7 +9,6 @@ class CameraGridPainter extends CustomPainter {
       ..style = PaintingStyle.stroke;
 
     // 绘制九宫格
-    // 垂直线
     canvas.drawLine(
       Offset(size.width / 3, 0),
       Offset(size.width / 3, size.height),
@@ -21,7 +20,6 @@ class CameraGridPainter extends CustomPainter {
       paint,
     );
 
-    // 水平线
     canvas.drawLine(
       Offset(0, size.height / 3),
       Offset(size.width, size.height / 3),
@@ -32,16 +30,15 @@ class CameraGridPainter extends CustomPainter {
       Offset(size.width, size.height * 2 / 3),
       paint,
     );
-    
+
     // 绘制四角边框 (类似取景框)
     final borderPaint = Paint()
       ..color = Colors.blueAccent
       ..strokeWidth = 3.0
       ..style = PaintingStyle.stroke;
-      
+
     double cornerLength = 20.0;
-    
-    // 左下角
+
     canvas.drawPath(
       Path()
         ..moveTo(0, size.height - cornerLength)
@@ -49,8 +46,7 @@ class CameraGridPainter extends CustomPainter {
         ..lineTo(cornerLength, size.height),
       borderPaint,
     );
-    
-    // 右下角
+
     canvas.drawPath(
       Path()
         ..moveTo(size.width - cornerLength, size.height)

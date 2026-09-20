@@ -33,15 +33,6 @@ import java.util.UUID;
 /**
  * 阿里云OSS文件存储服务实现
  *
- * 企业级文件存储服务，提供：
- * - 文件上传（图片、PDF）
- * - 文件下载
- * - 文件删除
- * - 签名URL生成
- * - 文件校验
- * - 异常处理
- * - 日志记录
- *
  * 启用条件：配置 aliyun.oss.enabled=true（默认启用）
  *
  * @author dangerhouse
@@ -56,34 +47,16 @@ public class OssFileStorageServiceImpl implements FileStorageService {
 
     private OSS ossClient;
 
-    /**
-     * 图片目录
-     */
     private static final String IMAGE_DIR = "images";
 
-    /**
-     * 检测结果图片目录
-     */
     private static final String RESULT_DIR = "results";
 
-    /**
-     * 报告目录
-     */
     private static final String REPORT_DIR = "reports";
 
-    /**
-     * 临时文件目录
-     */
     private static final String TEMP_DIR = "temp";
 
-    /**
-     * 日期路径格式
-     */
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy/MM/dd");
 
-    /**
-     * 允许的图片类型
-     */
     private static final Set<String> ALLOWED_IMAGE_TYPES = new HashSet<String>() {{
         add("image/jpeg");
         add("image/jpg");
@@ -93,21 +66,15 @@ public class OssFileStorageServiceImpl implements FileStorageService {
         add("image/bmp");
     }};
 
-    /**
-     * 允许的PDF类型
-     */
     private static final Set<String> ALLOWED_PDF_TYPES = new HashSet<String>() {{
         add("application/pdf");
     }};
 
     /**
-     * 本地临时文件基础目录（用于临时文件处理）
+     * 临时文件不落OSS，统一写到本地磁盘（AI检测需要可读的本地文件路径）
      */
     private static final String LOCAL_TEMP_BASE_DIR = System.getProperty("java.io.tmpdir") + "/dangerhouse";
 
-    /**
-     * 初始化OSS客户端
-     */
     @PostConstruct
     public void init() {
         try {
@@ -124,9 +91,6 @@ public class OssFileStorageServiceImpl implements FileStorageService {
         }
     }
 
-    /**
-     * 销毁OSS客户端
-     */
     @PreDestroy
     public void destroy() {
         if (ossClient != null) {
@@ -135,51 +99,24 @@ public class OssFileStorageServiceImpl implements FileStorageService {
         }
     }
 
-    /**
-     * 上传图片文件到OSS
-     * 自动校验文件类型和大小
-     *
-     * @param file 图片文件
-     * @return OSS对象Key
-     */
     @Override
     public String uploadImage(MultipartFile file) {
         validateImageFile(file);
         return uploadFile(file, IMAGE_DIR);
     }
 
-    /**
-     * 上传检测结果图片到OSS
-     *
-     * @param file 结果图片文件
-     * @return OSS对象Key
-     */
     @Override
     public String uploadResultImage(MultipartFile file) {
         validateImageFile(file);
         return uploadFile(file, RESULT_DIR);
     }
 
-    /**
-     * 上传PDF报告文件到OSS
-     *
-     * @param file PDF文件
-     * @return OSS对象Key
-     */
     @Override
     public String uploadPdf(MultipartFile file) {
         validatePdfFile(file);
         return uploadFile(file, REPORT_DIR);
     }
 
-    /**
-     * 通用文件上传方法
-     * 将文件上传到指定的OSS目录
-     *
-     * @param file      待上传文件
-     * @param directory OSS目录
-     * @return OSS对象Key（相对路径）
-     */
     @Override
     public String uploadFile(MultipartFile file, String directory) {
         validateFile(file);
@@ -190,14 +127,12 @@ public class OssFileStorageServiceImpl implements FileStorageService {
             String fileName = generateFileName(extension);
             String objectKey = buildObjectKey(directory, fileName);
 
-            // 设置元数据
             ObjectMetadata metadata = new ObjectMetadata();
             metadata.setContentLength(file.getSize());
             metadata.setContentType(file.getContentType());
             metadata.setCacheControl("max-age=31536000"); // 缓存1年
             metadata.setContentDisposition("inline");
 
-            // 上传到OSS
             ossClient.putObject(
                     ossProperties.getBucketName(),
                     objectKey,
@@ -217,14 +152,7 @@ public class OssFileStorageServiceImpl implements FileStorageService {
     }
 
     /**
-     * 上传字节数组到OSS
      * 适用于从内存直接上传的场景（如Base64解码后的数据）
-     *
-     * @param data        文件字节数据
-     * @param fileName    文件名
-     * @param directory   OSS目录
-     * @param contentType 内容类型
-     * @return OSS对象Key
      */
     @Override
     public String uploadBytes(byte[] data, String fileName, String directory, String contentType) {
@@ -257,14 +185,7 @@ public class OssFileStorageServiceImpl implements FileStorageService {
     }
 
     /**
-     * 上传输入流到OSS
      * 适用于大文件或流式传输场景
-     *
-     * @param inputStream 输入流
-     * @param fileName    文件名
-     * @param directory   OSS目录
-     * @param contentType 内容类型
-     * @return OSS对象Key
      */
     @Override
     public String uploadStream(InputStream inputStream, String fileName, String directory, String contentType) {
@@ -296,11 +217,7 @@ public class OssFileStorageServiceImpl implements FileStorageService {
     }
 
     /**
-     * 保存Base64编码的图片到OSS
      * 自动解析Base64前缀并提取图片类型
-     *
-     * @param base64Data Base64编码的图片数据
-     * @return OSS对象Key
      */
     @Override
     public String saveBase64Image(String base64Data) {
@@ -341,11 +258,7 @@ public class OssFileStorageServiceImpl implements FileStorageService {
     }
 
     /**
-     * 保存临时文件到本地磁盘
-     * 用于AI检测前的文件预处理
-     *
-     * @param file 待保存的文件
-     * @return 临时文件对象
+     * 保存临时文件到本地磁盘（用于AI检测前的文件预处理）
      */
     @Override
     public File saveTempFile(MultipartFile file) {
@@ -371,11 +284,6 @@ public class OssFileStorageServiceImpl implements FileStorageService {
         }
     }
 
-    /**
-     * 删除临时文件
-     *
-     * @param file 待删除的文件
-     */
     @Override
     public void deleteTempFile(File file) {
         if (file == null) {
@@ -390,11 +298,6 @@ public class OssFileStorageServiceImpl implements FileStorageService {
         }
     }
 
-    /**
-     * 批量删除临时文件
-     *
-     * @param files 待删除的文件列表
-     */
     @Override
     public void deleteTempFiles(Iterable<File> files) {
         if (files == null) {
@@ -405,20 +308,12 @@ public class OssFileStorageServiceImpl implements FileStorageService {
         }
     }
 
-    /**
-     * 获取文件访问URL
-     * 拼接OSS基础URL和相对路径
-     *
-     * @param relativePath 文件相对路径或完整URL
-     * @return 文件访问URL
-     */
     @Override
     public String getFileUrl(String relativePath) {
         if (relativePath == null || relativePath.isEmpty()) {
             return null;
         }
 
-        // 如果已经是完整URL，直接返回
         if (relativePath.startsWith("http://") || relativePath.startsWith("https://")) {
             return relativePath;
         }
@@ -438,12 +333,7 @@ public class OssFileStorageServiceImpl implements FileStorageService {
     }
 
     /**
-     * 生成签名URL（带过期时间）
      * 用于私有bucket的文件临时访问
-     *
-     * @param relativePath  文件相对路径
-     * @param expireSeconds 过期时间（秒）
-     * @return 签名URL
      */
     @Override
     public String getSignedUrl(String relativePath, long expireSeconds) {
@@ -468,20 +358,11 @@ public class OssFileStorageServiceImpl implements FileStorageService {
         }
     }
 
-    /**
-     * 生成默认过期时间的签名URL
-     */
     @Override
     public String getSignedUrl(String relativePath) {
         return getSignedUrl(relativePath, ossProperties.getSignatureExpireSeconds());
     }
 
-    /**
-     * 下载文件为字节数组
-     *
-     * @param relativePath 文件相对路径
-     * @return 文件字节数据
-     */
     @Override
     public byte[] downloadBytes(String relativePath) {
         if (relativePath == null || relativePath.isEmpty()) {
@@ -499,11 +380,7 @@ public class OssFileStorageServiceImpl implements FileStorageService {
     }
 
     /**
-     * 下载文件为输入流
-     * 适用于大文件流式处理
-     *
-     * @param relativePath 文件相对路径
-     * @return 输入流（调用者负责关闭）
+     * 适用于大文件流式处理，返回的输入流由调用者负责关闭
      */
     @Override
     public InputStream downloadStream(String relativePath) {
@@ -520,12 +397,6 @@ public class OssFileStorageServiceImpl implements FileStorageService {
         }
     }
 
-    /**
-     * 删除OSS文件
-     *
-     * @param relativePath 文件相对路径
-     * @return 是否删除成功
-     */
     @Override
     public boolean deleteFile(String relativePath) {
         if (relativePath == null || relativePath.isEmpty()) {
@@ -544,12 +415,6 @@ public class OssFileStorageServiceImpl implements FileStorageService {
         }
     }
 
-    /**
-     * 检查文件是否存在
-     *
-     * @param relativePath 文件相对路径
-     * @return 是否存在
-     */
     @Override
     public boolean fileExists(String relativePath) {
         if (relativePath == null || relativePath.isEmpty()) {
@@ -567,10 +432,7 @@ public class OssFileStorageServiceImpl implements FileStorageService {
     }
 
     /**
-     * 获取文件大小
-     *
-     * @param relativePath 文件相对路径
-     * @return 文件大小（字节），失败返回0
+     * 查询失败时返回 0 而不是抛异常
      */
     @Override
     public long getFileSize(String relativePath) {
@@ -589,39 +451,25 @@ public class OssFileStorageServiceImpl implements FileStorageService {
         }
     }
 
-    /**
-     * 获取存储类型标识
-     */
     @Override
     public String getStorageType() {
         return "OSS";
     }
 
-    /**
-     * 获取报告目录
-     */
     @Override
     public String getReportDir() {
         return REPORT_DIR;
     }
 
-    /**
-     * 获取图片目录
-     */
     @Override
     public String getImageDir() {
         return IMAGE_DIR;
     }
 
-    /**
-     * 获取结果图目录
-     */
     @Override
     public String getResultDir() {
         return RESULT_DIR;
     }
-
-    // ==================== 私有方法 ====================
 
     /**
      * 校验文件基本信息（非空、大小限制）
@@ -637,9 +485,6 @@ public class OssFileStorageServiceImpl implements FileStorageService {
         }
     }
 
-    /**
-     * 校验图片文件类型
-     */
     private void validateImageFile(MultipartFile file) {
         validateFile(file);
 
@@ -649,9 +494,6 @@ public class OssFileStorageServiceImpl implements FileStorageService {
         }
     }
 
-    /**
-     * 校验PDF文件类型
-     */
     private void validatePdfFile(MultipartFile file) {
         validateFile(file);
 
@@ -680,7 +522,6 @@ public class OssFileStorageServiceImpl implements FileStorageService {
         }
 
         String objectKey = path;
-        // 如果是完整URL，提取路径部分
         if (path.startsWith("http://") || path.startsWith("https://")) {
             String baseUrl = ossProperties.getBaseUrl();
             if (baseUrl != null && !baseUrl.isEmpty() && path.startsWith(baseUrl)) {
@@ -695,16 +536,10 @@ public class OssFileStorageServiceImpl implements FileStorageService {
         return objectKey;
     }
 
-    /**
-     * 生成唯一文件名（UUID）
-     */
     private String generateFileName(String extension) {
         return UUID.randomUUID().toString().replace("-", "") + extension;
     }
 
-    /**
-     * 获取文件扩展名
-     */
     private String getFileExtension(String filename) {
         if (filename == null || filename.isEmpty()) {
             return ".jpg";
@@ -716,9 +551,6 @@ public class OssFileStorageServiceImpl implements FileStorageService {
         return filename.substring(lastDotIndex);
     }
 
-    /**
-     * 根据Content-Type获取文件扩展名
-     */
     private String getExtensionFromContentType(String contentType) {
         if (contentType == null) {
             return ".jpg";

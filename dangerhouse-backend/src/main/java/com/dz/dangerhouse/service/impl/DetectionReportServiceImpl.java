@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 
 /**
  * 检测报告服务实现类
- * 负责报告的创建和管理
  */
 @Service
 public class DetectionReportServiceImpl implements DetectionReportService {
@@ -25,16 +24,11 @@ public class DetectionReportServiceImpl implements DetectionReportService {
 
     /**
      * 确保检测任务有关联的报告记录
-     * 如果已存在则返回现有报告，否则创建新报告
      *
-     * @param detectionId 检测任务ID
-     * @param buildingId  建筑ID
-     * @param fileType    文件类型（PDF/WORD）
-     * @return 报告实体
+     * @param fileType 文件类型（PDF/WORD）
      */
     @Override
     public Report ensureReport(Long detectionId, Long buildingId, String fileType) {
-        // 查询是否已存在报告
         Report existing = reportMapper.selectOne(
                 new LambdaQueryWrapper<Report>()
                         .eq(Report::getDetectionId, detectionId)
@@ -44,7 +38,6 @@ public class DetectionReportServiceImpl implements DetectionReportService {
             return existing;
         }
 
-        // 创建新报告
         String type = fileType != null ? fileType.toUpperCase() : "PDF";
         Report report = new Report();
         report.setBuildingId(buildingId);

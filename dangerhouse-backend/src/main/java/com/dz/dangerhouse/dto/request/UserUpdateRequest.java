@@ -9,13 +9,10 @@ import lombok.Data;
 public class UserUpdateRequest {
 
     /**
-     * 用户ID（路径参数）
+     * 追加在请求体里的用户ID，服务端不使用（实际以路径参数或当前登录用户为准）
      */
     private Long id;
 
-    /**
-     * 手机号
-     */
     private String phone;
 
     /**

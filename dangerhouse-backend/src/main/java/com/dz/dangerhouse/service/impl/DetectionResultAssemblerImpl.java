@@ -18,8 +18,6 @@ import java.util.Map;
 
 /**
  * 检测结果DTO组装器实现
- * 负责将多个实体对象（Detection、Building、User、Image、Report等）
- * 组装成统一的检测结果响应对象（DetectionResultResponse）
  */
 @Service
 public class DetectionResultAssemblerImpl implements DetectionResultAssembler {
@@ -27,19 +25,6 @@ public class DetectionResultAssemblerImpl implements DetectionResultAssembler {
     @Autowired
     private FileUploadUtil fileUploadUtil;
 
-    /**
-     * 组装检测结果响应对象
-     * 整合检测记录、建筑信息、用户信息、图片列表、报告信息和AI分析结果
-     *
-     * @param detection       检测记录
-     * @param building        建筑信息
-     * @param user            用户信息
-     * @param images          图片列表
-     * @param report          报告信息
-     * @param dataInfos       AI检测数据列表
-     * @param detectResultMap 检测结果Map
-     * @return 组装好的检测结果响应对象
-     */
     @Override
     public DetectionResultResponse assemble(
             Detection detection,
@@ -50,7 +35,6 @@ public class DetectionResultAssemblerImpl implements DetectionResultAssembler {
             List<AiDetectionResponse.DataInfo> dataInfos,
             Map<String, Object> detectResultMap
     ) {
-        // 提取AI分析结果
         AiDetectionResponse.Analysis analysis = null;
         if (dataInfos != null) {
             for (AiDetectionResponse.DataInfo dataInfo : dataInfos) {
@@ -61,7 +45,6 @@ public class DetectionResultAssemblerImpl implements DetectionResultAssembler {
             }
         }
 
-        // 组装图片信息列表
         List<DetectionResultResponse.ImageInfo> imageInfos = new ArrayList<>();
         if (images != null) {
             for (Image image : images) {
@@ -76,7 +59,6 @@ public class DetectionResultAssemblerImpl implements DetectionResultAssembler {
             }
         }
 
-        // 组装报告信息
         DetectionResultResponse.ReportInfo reportInfo = null;
         if (report != null) {
             reportInfo = DetectionResultResponse.ReportInfo.builder()
@@ -87,7 +69,6 @@ public class DetectionResultAssemblerImpl implements DetectionResultAssembler {
                     .build();
         }
 
-        // 构建最终的检测结果响应对象
         return DetectionResultResponse.builder()
                 .id(detection.getId())
                 .buildingId(building != null ? building.getId() : null)

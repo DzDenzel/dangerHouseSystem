@@ -21,9 +21,7 @@ from torchvision.models.detection import (
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 
 
-# -------------------------
 # 1) 模型构建 / 推理
-# -------------------------
 def build_model(num_classes=2, detections_per_img=30, nms_thresh=0.3):
     weights = FasterRCNN_ResNet50_FPN_V2_Weights.DEFAULT
     model = fasterrcnn_resnet50_fpn_v2(weights=weights)
@@ -97,7 +95,6 @@ def cv_to_qpixmap(img_bgr: np.ndarray, max_w=900, max_h=700) -> QPixmap:
     qimg = QImage(rgb.data, w, h, bytes_per_line, QImage.Format.Format_RGB888)
     pix = QPixmap.fromImage(qimg)
 
-    # 等比缩放
     if pix.width() > max_w or pix.height() > max_h:
         pix = pix.scaled(max_w, max_h, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
     return pix
@@ -108,9 +105,7 @@ def list_images_in_folder(folder: Path):
     return sorted([p for p in folder.iterdir() if p.is_file() and p.suffix.lower() in exts])
 
 
-# -------------------------
 # 2) PyQt6 主界面
-# -------------------------
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -289,12 +284,12 @@ class MainWindow(QMainWindow):
                 nms_thresh=self.spin_nms.value()
             )
             self.weight_path = path
-            self.set_status(f"模型加载成功 ✅\n权重：{path}\n设备：{self.device}")
+            self.set_status(f"模型加载成功\n权重：{path}\n设备：{self.device}")
             self.btn_open.setEnabled(True)
             self.btn_batch.setEnabled(True)
         except Exception as e:
             self.model = None
-            self.set_status(f"模型加载失败 ❌\n{e}")
+            self.set_status(f"模型加载失败\n{e}")
             QMessageBox.critical(self, "加载失败", str(e))
 
     def on_open_image(self):
@@ -330,13 +325,13 @@ class MainWindow(QMainWindow):
             self.btn_save_json.setEnabled(True)
 
             self.set_status(
-                f"检测完成 ✅\n"
+                f"检测完成\n"
                 f"图片：{fname}\n"
                 f"阈值：{self.score_thr():.2f}\n"
                 f"框数量：{len(scores)}"
             )
         except Exception as e:
-            self.set_status(f"推理失败 ❌\n{e}")
+            self.set_status(f"推理失败\n{e}")
             QMessageBox.critical(self, "推理失败", str(e))
 
     def on_save_vis(self):
@@ -404,7 +399,7 @@ class MainWindow(QMainWindow):
             summary.append({"file": p.name, "num_boxes": int(len(scores))})
 
         (out_dir / "summary.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
-        self.set_status(f"批量完成 ✅\n共处理：{len(summary)} 张\n输出目录：{out_dir}")
+        self.set_status(f"批量完成\n共处理：{len(summary)} 张\n输出目录：{out_dir}")
         QMessageBox.information(self, "完成", f"批量处理完成！\n输出目录：{out_dir}")
 
     def show_images(self, img_bgr, vis_bgr):

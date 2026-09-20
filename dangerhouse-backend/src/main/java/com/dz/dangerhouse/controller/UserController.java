@@ -122,7 +122,7 @@ public class UserController {
     public Result<Void> updateInspectorRole(@PathVariable Long userId, @RequestBody InspectorRoleUpdateRequest request) {
         boolean inspector = Boolean.TRUE.equals(request.getInspector());
         userService.updateInspectorRole(userId, inspector);
-        return Result.success(inspector ? "宸茶缃负妫€娴嬪憳" : "宸插彇娑堟娴嬪憳韬唤", null);
+        return Result.success(inspector ? "已设置为检测员" : "已取消检测员身份", null);
     }
 
     /**

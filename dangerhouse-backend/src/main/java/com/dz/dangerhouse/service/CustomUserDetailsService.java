@@ -55,9 +55,6 @@ public class CustomUserDetailsService implements UserDetailsService {
         return toUserDetails(cached);
     }
 
-    /**
-     * 从数据库加载用户认证信息
-     */
     private AuthUserCacheEntry loadAuthUserCache(String account) {
         User user = findUserByAccount(account);
         if (user == null) {
@@ -76,9 +73,6 @@ public class CustomUserDetailsService implements UserDetailsService {
         return buildCacheEntry(user, roleCodes);
     }
 
-    /**
-     * 构建缓存对象
-     */
     private AuthUserCacheEntry buildCacheEntry(User user, List<String> roleCodes) {
         AuthUserCacheEntry entry = new AuthUserCacheEntry();
         entry.setUserId(user.getId());
@@ -91,18 +85,12 @@ public class CustomUserDetailsService implements UserDetailsService {
         return entry;
     }
 
-    /**
-     * 验证缓存条目的有效性
-     */
     private void validateCacheEntry(AuthUserCacheEntry entry, String account) {
         if (entry.getStatus() != null && entry.getStatus() == 0) {
             throw new UsernameNotFoundException("用户已禁用：" + account);
         }
     }
 
-    /**
-     * 转换为Spring Security的UserDetails对象
-     */
     private UserDetails toUserDetails(AuthUserCacheEntry entry) {
         List<String> roleCodes = entry.getRoleCodes();
         if (roleCodes == null || roleCodes.isEmpty()) {
@@ -132,18 +120,15 @@ public class CustomUserDetailsService implements UserDetailsService {
             return null;
         }
 
-        // 手机号格式
         if (account.matches("^1[3-9]\\d{9}$")) {
             log.debug("通过手机号查找用户：{}", account);
             return userMapper.findByPhone(account);
         }
-        // 邮箱格式
         if (account.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")) {
             log.debug("通过邮箱查找用户：{}", account);
             return userMapper.findByEmail(account);
         }
 
-        // 用户名格式
         log.debug("通过用户名查找用户：{}", account);
         return userMapper.findByUsername(account);
     }
@@ -159,9 +144,6 @@ public class CustomUserDetailsService implements UserDetailsService {
         cacheAlias(entry.getEmail(), entry, ttlMinutes);
     }
 
-    /**
-     * 缓存单个账号别名
-     */
     private void cacheAlias(String account, AuthUserCacheEntry entry, long ttlMinutes) {
         if (account != null && !account.isBlank()) {
             cacheService.putWithJitter(cacheProperties.authUserKey(account), entry, ttlMinutes, TimeUnit.MINUTES);
@@ -184,9 +166,6 @@ public class CustomUserDetailsService implements UserDetailsService {
         }
     }
 
-    /**
-     * 删除指定账号的缓存
-     */
     private void deleteIfPresent(String account) {
         if (account != null && !account.isBlank()) {
             cacheService.delete(cacheProperties.authUserKey(account));

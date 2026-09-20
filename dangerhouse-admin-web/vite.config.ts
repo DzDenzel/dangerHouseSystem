@@ -51,7 +51,7 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
     server: {
       // 允许IP访问
       host: "0.0.0.0",
-      // 🔴 关键修改：直接指定端口为9090（替代原来的读取环境变量）
+      // 端口在此写死，不读 .env 里的 VITE_APP_PORT
       port: 9090,
       // 运行是否自动打开浏览器
       open: true,

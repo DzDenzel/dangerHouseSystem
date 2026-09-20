@@ -40,7 +40,6 @@ import java.util.stream.Collectors;
 
 /**
  * 检测服务实现类
- * 提供检测任务创建、图片上传、AI检测、结果查询等完整功能
  */
 @Slf4j
 @Service
@@ -79,14 +78,6 @@ public class DetectionServiceImpl implements DetectionService {
     @Autowired
     private CacheProperties cacheProperties;
 
-    /**
-     * 为建筑创建空的检测任务
-     *
-     * @param buildingId  建筑ID
-     * @param userId      用户ID
-     * @param description 任务描述
-     * @return 检测任务响应
-     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public DetectionResultResponse createTask(Long buildingId, Long userId, String description) {
@@ -118,13 +109,6 @@ public class DetectionServiceImpl implements DetectionService {
         return buildDetectionResponse(detection, building, user, null);
     }
 
-    /**
-     * 为现有检测任务上传一张或多张图片
-     *
-     * @param detectionId 检测任务ID
-     * @param images      图片文件列表
-     * @return 图片信息列表
-     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public List<DetectionResultResponse.ImageInfo> uploadImages(Long detectionId, List<MultipartFile> images) {
@@ -171,12 +155,6 @@ public class DetectionServiceImpl implements DetectionService {
         return imageInfos;
     }
 
-    /**
-     * 启动检测任务的AI分析
-     *
-     * @param detectionId 检测任务ID
-     * @return 检测结果响应
-     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public DetectionResultResponse startDetection(Long detectionId) {
@@ -254,11 +232,6 @@ public class DetectionServiceImpl implements DetectionService {
         return buildDetectionResponse(detection, building, user, images);
     }
 
-    /**
-     * 取消待处理的检测任务
-     *
-     * @param detectionId 检测任务ID
-     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void cancelDetection(Long detectionId) {
@@ -280,11 +253,6 @@ public class DetectionServiceImpl implements DetectionService {
         log.info("取消检测任务成功：taskId={}", detectionId);
     }
 
-    /**
-     * 删除检测任务
-     *
-     * @param id 检测任务ID
-     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteDetection(Long id) {
@@ -304,10 +272,7 @@ public class DetectionServiceImpl implements DetectionService {
     }
 
     /**
-     * 根据ID获取检测详情（带缓存）
-     *
-     * @param id 检测任务ID
-     * @return 检测结果响应
+     * 带缓存；USER 角色只能查看本人创建的检测记录
      */
     @Override
     public DetectionResultResponse getDetectionById(Long id) {
@@ -327,18 +292,6 @@ public class DetectionServiceImpl implements DetectionService {
         return response;
     }
 
-    /**
-     * 分页获取检测记录（带缓存）
-     *
-     * @param page      页码
-     * @param size      每页数量
-     * @param buildingId 建筑ID
-     * @param status    状态
-     * @param riskLevel 风险等级
-     * @param startDate 开始日期
-     * @param endDate   结束日期
-     * @return 分页结果
-     */
     @Override
     public Page<DetectionResultResponse> getDetectionList(
             Integer page,
@@ -365,9 +318,6 @@ public class DetectionServiceImpl implements DetectionService {
         return resultPage;
     }
 
-    /**
-     * 根据 ID 加载检测详情
-     */
     private DetectionResultResponse loadDetectionById(Long id) {
         Detection detection = detectionMapper.selectById(id);
         if (detection == null) {
@@ -384,9 +334,6 @@ public class DetectionServiceImpl implements DetectionService {
         return buildDetectionResponse(detection, building, user, images);
     }
 
-    /**
-     * 加载检测列表分页数据
-     */
     private Page<DetectionResultResponse> loadDetectionList(
             Integer page,
             Integer size,
@@ -425,12 +372,6 @@ public class DetectionServiceImpl implements DetectionService {
         return resultPage;
     }
 
-    /**
-     * 获取用户创建的所有检测记录
-     *
-     * @param userId 用户ID
-     * @return 检测记录列表
-     */
     @Override
     public List<DetectionResultResponse> getDetectionsByUserId(Long userId) {
         List<Detection> detections = detectionMapper.selectList(
@@ -449,27 +390,12 @@ public class DetectionServiceImpl implements DetectionService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * 单图上传检测兼容方法
-     *
-     * @param buildingId 建筑ID
-     * @param file       图片文件
-     * @return 检测结果响应
-     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public DetectionResultResponse uploadAndDetect(Long buildingId, MultipartFile file) {
         return uploadAndDetectMultiple(buildingId, List.of(file), null);
     }
 
-    /**
-     * 批量上传图片并执行检测
-     *
-     * @param buildingId 建筑ID
-     * @param files      图片文件列表
-     * @param imageType  图片类型
-     * @return 检测结果响应
-     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public DetectionResultResponse uploadAndDetectMultiple(Long buildingId, List<MultipartFile> files, String imageType) {
@@ -559,12 +485,6 @@ public class DetectionServiceImpl implements DetectionService {
         return buildDetectionResponse(detection, building, currentUser, savedImages);
     }
 
-    /**
-     * 获取建筑下的所有检测记录
-     *
-     * @param buildingId 建筑ID
-     * @return 检测记录列表
-     */
     @Override
     public List<DetectionResultResponse> getDetectionsByBuildingId(Long buildingId) {
         List<Detection> detections = detectionMapper.selectList(
@@ -584,11 +504,6 @@ public class DetectionServiceImpl implements DetectionService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * 删除建筑下的所有检测记录
-     *
-     * @param buildingId 建筑ID
-     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteByBuildingId(Long buildingId) {
@@ -612,10 +527,7 @@ public class DetectionServiceImpl implements DetectionService {
     }
 
     /**
-     * 解析图片路径为文件对象
-     *
-     * @param images 图片实体列表
-     * @return 文件对象列表
+     * 只返回磁盘上真实存在的文件
      */
     private List<File> resolveImageFiles(List<Image> images) {
         List<File> imageFiles = new ArrayList<>();
@@ -628,15 +540,6 @@ public class DetectionServiceImpl implements DetectionService {
         return imageFiles;
     }
 
-    /**
-     * 构建检测结果响应对象
-     *
-     * @param detection 检测记录
-     * @param building  建筑信息
-     * @param user      用户信息
-     * @param images    图片列表
-     * @return 检测结果响应
-     */
     private DetectionResultResponse buildDetectionResponse(
             Detection detection,
             Building building,
@@ -656,33 +559,19 @@ public class DetectionServiceImpl implements DetectionService {
     }
 
     /**
-     * 清除检测相关缓存（检测详情和检测列表）
-     *
-     * @param detectionId 检测任务ID
+     * 检测详情与检测列表都按 detectionId 无关的维度缓存，一并清掉
      */
     private void evictDetectionCache(Long detectionId) {
         cacheService.delete(cacheProperties.detectionDetailKey(detectionId));
         cacheService.deleteByPrefix(cacheProperties.getDetectionListPrefix());
     }
 
-    /**
-     * 清除仪表盘缓存
-     */
     private void evictDashboardCache() {
         cacheService.delete(cacheProperties.getDashboardKey());
     }
 
     /**
-     * 构建检测列表缓存键名
-     *
-     * @param page      页码
-     * @param size      每页数量
-     * @param buildingId 建筑ID
-     * @param status    状态
-     * @param riskLevel 风险等级
-     * @param startDate 开始日期
-     * @param endDate   结束日期
-     * @return 缓存键名
+     * 把查询条件、当前用户和角色拼进键里，避免不同用户/条件互相串数据
      */
     private String buildDetectionListCacheKey(Integer page, Integer size, Long buildingId, String status,
             String riskLevel, LocalDate startDate, LocalDate endDate, Long currentUserId, boolean userOnly) {
@@ -698,18 +587,12 @@ public class DetectionServiceImpl implements DetectionService {
                 + safe(userOnly);
     }
 
-    /**
-     * 安全地将对象转换为字符串，null值转为下划线
-     *
-     * @param value 对象
-     * @return 字符串
-     */
     private String safe(Object value) {
         return value == null ? "_" : String.valueOf(value).trim();
     }
 
     /**
-     * 验证建筑访问权限
+     * USER 角色只能操作自己名下的建筑，管理员直接放行
      */
     private void validateBuildingAccess(Building building) {
         if (!currentUserService.hasRole("USER")) {
@@ -722,7 +605,7 @@ public class DetectionServiceImpl implements DetectionService {
     }
 
     /**
-     * 验证检测任务访问权限
+     * USER 角色只能操作本人创建的检测任务，管理员直接放行
      */
     private void validateDetectionAccess(Detection detection) {
         if (!currentUserService.hasRole("USER")) {

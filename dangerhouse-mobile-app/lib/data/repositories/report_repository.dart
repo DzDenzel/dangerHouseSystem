@@ -32,9 +32,9 @@ class ReportRepository {
 
       return _dioClient.parseResponseData(response, ReportGenerateResponse.fromJson);
     } on DioException catch (e) {
-      throw Exception(ErrorHandler.getErrorMessage(e, defaultMsg: '鎶ュ憡鐢熸垚澶辫触'));
+      throw Exception(ErrorHandler.getErrorMessage(e, defaultMsg: '报告生成失败'));
     } catch (e) {
-      throw Exception('鎶ュ憡鐢熸垚澶辫触: $e');
+      throw Exception('报告生成失败: $e');
     }
   }
 
@@ -46,9 +46,9 @@ class ReportRepository {
 
       return _dioClient.parseResponseData(response, ReportDto.fromJson);
     } on DioException catch (e) {
-      throw Exception(ErrorHandler.getErrorMessage(e, defaultMsg: '鑾峰彇鎶ュ憡璇︽儏澶辫触'));
+      throw Exception(ErrorHandler.getErrorMessage(e, defaultMsg: '获取报告详情失败'));
     } catch (e) {
-      throw Exception('鑾峰彇鎶ュ憡璇︽儏澶辫触: $e');
+      throw Exception('获取报告详情失败: $e');
     }
   }
 
@@ -70,9 +70,9 @@ class ReportRepository {
       }
       return null;
     } on DioException catch (e) {
-      throw Exception(ErrorHandler.getErrorMessage(e, defaultMsg: '鑾峰彇涓嬭浇閾炬帴澶辫触'));
+      throw Exception(ErrorHandler.getErrorMessage(e, defaultMsg: '获取下载链接失败'));
     } catch (e) {
-      throw Exception('鑾峰彇涓嬭浇閾炬帴澶辫触: $e');
+      throw Exception('获取下载链接失败: $e');
     }
   }
 
@@ -123,9 +123,9 @@ class ReportRepository {
 
       return responseBytes;
     } on DioException catch (e) {
-      throw Exception(ErrorHandler.getErrorMessage(e, defaultMsg: '涓嬭浇鎶ュ憡澶辫触'));
+      throw Exception(ErrorHandler.getErrorMessage(e, defaultMsg: '下载报告失败'));
     } catch (e) {
-      throw Exception('涓嬭浇鎶ュ憡澶辫触: $e');
+      throw Exception('下载报告失败: $e');
     }
   }
 
@@ -217,9 +217,9 @@ class ReportRepository {
         ReportDto.fromJson,
       );
     } on DioException catch (e) {
-      throw Exception(ErrorHandler.getErrorMessage(e, defaultMsg: '鑾峰彇鎶ュ憡鍒楄〃澶辫触'));
+      throw Exception(ErrorHandler.getErrorMessage(e, defaultMsg: '获取报告列表失败'));
     } catch (e) {
-      throw Exception('鑾峰彇鎶ュ憡鍒楄〃澶辫触: $e');
+      throw Exception('获取报告列表失败: $e');
     }
   }
 }

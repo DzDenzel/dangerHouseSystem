@@ -17,6 +17,7 @@ public interface BuildingService extends IService<Building> {
      * @param pageSize 每页数量
      * @param name 建筑名称
      * @param address 地址
+     * @param structureType 结构类型
      * @param ownerName 业主姓名
      * @param riskLevels 风险等级过滤（逗号分隔）
      * @return 分页结果

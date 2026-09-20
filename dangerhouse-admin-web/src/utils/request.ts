@@ -62,7 +62,6 @@ service.interceptors.response.use(
   (error: any) => {
     const requestUrl = error.config?.url || "";
     const isAuthRequest = requestUrl.includes("/auth/");
-    const isCaptchaRequest = requestUrl.includes("/auth/captcha");
     const silent =
       (error.config as any)?.headers?.["X-Silent-Error"] === "true";
 
@@ -89,14 +88,14 @@ service.interceptors.response.use(
               reloginPromptVisible = false;
             });
         }
-      } else if (!isCaptchaRequest && !silent) {
+      } else if (!silent) {
         ElMessage.error(displayMessage);
       }
 
       return Promise.reject(new Error(displayMessage));
     }
 
-    if (!isCaptchaRequest && !silent) {
+    if (!silent) {
       ElMessage.error(error.message || "网络连接失败，请检查服务是否正常");
     }
 
